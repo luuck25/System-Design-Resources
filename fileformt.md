@@ -1,5 +1,44 @@
 How do columnar storage formats speed up analytical queries?
 
+# How Columnar Storage Formats Speed Up Analytical Queries
+
+Columnar storage formats speed up analytical queries by fundamentally changing how data is organized, compressed, and accessed. Unlike traditional row-based formats (like CSV or JSON) that store records sequentially, columnar formats like **Apache Parquet** and **ORC** group all values for a single field together.
+
+This vertical organization enables several critical optimizations that drastically reduce I/O overhead and processing time.
+
+---
+
+## 1. Column Pruning (I/O Reduction)
+
+The most direct performance benefit comes from **column pruning**, which allows a query engine to read only the specific columns needed for a query.
+
+In a row-based system, reading even a single metric requires loading the entire row into memory—including hundreds of irrelevant columns—only to discard them.
+
+In a columnar format:
+- The engine uses metadata to identify exact byte offsets for required columns
+- Skips the rest of the file entirely
+
+For wide tables, this can reduce the data footprint read from disk by **80% to 99%**.
+
+---
+
+## 2. Predicate Pushdown and Data Skipping
+
+Columnar formats support **predicate pushdown**, an optimization that filters data at the storage layer before loading it into memory.
+
+These files contain self-describing metadata in a **file footer**, including:
+- Minimum and maximum values
+- Null counts
+- Distinct counts
+- Row group / stripe statistics
+
+### How It Works
+
+If a query includes a filter:
+
+```sql
+SELECT * FROM products WHERE price > 500;
+
 ### The Engine
 
 - Reads min/max statistics from the footer  
