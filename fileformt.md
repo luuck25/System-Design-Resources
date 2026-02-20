@@ -37,7 +37,7 @@ These files contain self-describing metadata in a **file footer**, including:
 If a query includes a filter:
 
 ```sql
-SELECT * FROM products WHERE price > 500;
+SELECT * FROM products WHERE price > 500; ```
 
 ### The Engine
 
