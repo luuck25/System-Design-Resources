@@ -1,28 +1,130 @@
 How do columnar storage formats speed up analytical queries?
 
-Columnar storage formats speed up analytical queries by fundamentally changing how data is organized, compressed, and accessed. Unlike traditional row-based formats (like CSV or JSON) that store records sequentially, columnar formats like **Apache Parquet** and **ORC** group all values for a single field together. This vertical organization enables several critical optimizations that drastically reduce I/O overhead and processing time.
+# How Columnar Storage Formats Speed Up Analytical Queries
 
-### 1. Column Pruning (I/O Reduction)
-The most direct performance benefit comes from **column pruning**, which allows a query engine to read only the specific columns needed for a query. In a row-based system, reading even a single metric requires the system to load the entire row into memory—including hundreds of irrelevant columns—only to discard them. In a columnar format, the engine uses metadata to identify the exact byte offsets for the required columns and skips the rest of the file entirely. For wide tables, this can reduce the data footprint read from disk by **80% to 99%**.
+Columnar storage formats speed up analytical queries by fundamentally changing how data is organized, compressed, and accessed. Unlike traditional row-based formats (like CSV or JSON) that store records sequentially, columnar formats like **Apache Parquet** and **ORC** group all values for a single field together.
 
-### 2. Predicate Pushdown and Data Skipping
-Columnar formats facilitate **predicate pushdown**, an optimization that filters data at the storage level before it is loaded into memory. These files contain self-describing metadata in a **file footer**, including minimum and maximum values, null counts, and distinct counts for each "row group" or "stripe".
-*   **How it works:** If a query includes a filter (e.g., `WHERE price > 500`), the engine checks the min/max statistics in the footer. If a row group's maximum price is only 100, the engine **skips that entire block**—potentially millions of rows—without reading a single data page.
-*   **Advanced Indexing:** Formats like ORC also include **Bloom filters**, which can probabilistically determine if a value exists in a block, further accelerating selective point-lookup queries.
+This vertical organization enables several critical optimizations that drastically reduce I/O overhead and processing time.
 
-### 3. Superior Compression and Encoding
-Analytical queries benefit from the fact that columnar data is **homogeneous** (all values in a column are the same data type), making it highly compressible. Specialized **encoding techniques** reduce the logical size of data before physical compression is applied:
-*   **Dictionary Encoding:** Replaces repeated values (like country names) with small integers, significantly shrinking string columns.
-*   **Run-Length Encoding (RLE):** Stores a value once along with a count for repeated sequences, which is ideal for sorted data.
-*   **Delta Encoding:** Stores the difference between consecutive values, which is highly effective for timestamps and sequential IDs.
-These techniques result in 5–10x better compression than uncompressed formats, meaning **less data must be moved over the network** from storage to the compute engine.
+---
 
-### 4. Vectorized Execution
-Columnar formats are designed for **vectorized processing**, where the query engine performs operations on a batch of values (a "vector") rather than one row at a time. By processing similar data types stored contiguously, databases can exploit **SIMD (Single Instruction, Multiple Data)** parallelism. This approach maximizes CPU cache utilization and reduces the computational overhead associated with traditional row-by-row processing.
+## 1. Column Pruning (I/O Reduction)
 
-### 5. Hierarchical Architecture
-The internal structure of these files—divided into **row groups (or stripes)**, **column chunks**, and **pages**—enables parallel processing and granular access.
-*   **Parallelism:** Each row group can be read and processed in parallel across different nodes in a distributed system like Spark.
-*   **Page-Level Skipping:** The smallest unit of storage, the page, is the atomic unit of compression. If the metadata indicates a page is irrelevant, the reader can skip it, saving both decompression and decoding costs.
+The most direct performance benefit comes from **column pruning**, which allows a query engine to read only the specific columns needed for a query.
 
-In practice, transitioning from row-based CSV files to a columnar format like Parquet typically **reduces query times by 5x to 10x** and decreases storage costs by **60% to 80%**.
+In a row-based system, reading even a single metric requires loading the entire row into memory—including hundreds of irrelevant columns—only to discard them.
+
+In a columnar format:
+- The engine uses metadata to identify exact byte offsets for required columns
+- Skips the rest of the file entirely
+
+For wide tables, this can reduce the data footprint read from disk by **80% to 99%**.
+
+---
+
+## 2. Predicate Pushdown and Data Skipping
+
+Columnar formats support **predicate pushdown**, an optimization that filters data at the storage layer before loading it into memory.
+
+These files contain self-describing metadata in a **file footer**, including:
+- Minimum and maximum values
+- Null counts
+- Distinct counts
+- Row group / stripe statistics
+
+### How It Works
+
+If a query includes a filter:
+
+```sql
+SELECT * FROM products WHERE price > 500;
+
+The engine:
+
+Reads min/max statistics from the footer
+
+Skips entire row groups where the condition cannot be true
+
+Example:
+
+If a row group's max(price) is 100
+
+The engine skips that block entirely
+
+This can avoid reading millions of rows.
+
+Advanced Indexing
+
+Formats like ORC also include Bloom filters, which:
+
+Probabilistically test whether a value exists in a block
+
+Accelerate highly selective point-lookups
+
+3. Superior Compression and Encoding
+
+Columnar data is homogeneous (same data type per column), which makes it highly compressible.
+
+Specialized encoding techniques reduce logical size before compression:
+
+Dictionary Encoding
+
+Replaces repeated values (e.g., country names) with small integer IDs.
+
+Run-Length Encoding (RLE)
+
+Stores a value once with a repetition count — ideal for sorted data.
+
+Delta Encoding
+
+Stores differences between consecutive values — effective for:
+
+Timestamps
+
+Sequential IDs
+
+These techniques often deliver 5–10× better compression, meaning:
+
+Less disk I/O
+
+Less network transfer
+
+Faster scans
+
+4. Vectorized Execution
+
+Columnar formats are optimized for vectorized processing.
+
+Instead of processing one row at a time:
+
+The engine processes batches ("vectors") of values
+
+Enables SIMD (Single Instruction, Multiple Data) parallelism
+
+Improves CPU cache utilization
+
+Result:
+
+Fewer CPU instructions
+
+Higher throughput
+
+Lower overhead
+
+5. Hierarchical Architecture
+
+Columnar files are organized into:
+
+Row Groups (Parquet) or Stripes (ORC)
+
+Column Chunks
+
+Pages
+
+Parallelism
+
+Each row group can be processed independently, enabling distributed execution across systems like Spark.
+
+Page-Level Skipping
+
+Pages are the atomic unit of compression. If metadata indicates a page is irrelevant, it can be skipped without decompression.
