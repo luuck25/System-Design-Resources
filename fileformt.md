@@ -269,4 +269,197 @@ Use **Avro** when:
 Use **Parquet** when:
 - Your workload is analytics-heavy  
 - You need column pruning and predicate pushdown  
-- Storage efficiency and scan performance are priorities  
+- Storage efficiency and scan performance are priorities
+
+
+  # Apache ORC (Optimized Row Columnar)
+
+**Apache ORC (Optimized Row Columnar)** is a high-performance columnar storage format designed to overcome the limitations of traditional row-based storage in big data environments.
+
+Like Parquet, ORC is columnar. However, it originated within the **Apache Hive** community to specifically optimize Hive query performance.
+
+---
+
+# Core Architecture: The Stripe Model
+
+Instead of Parquet’s *row groups*, ORC divides data into horizontal partitions called **stripes** (typically ~250 MB by default).
+
+Each stripe is self-contained and consists of:
+
+### 1. Index Data
+- Contains row positions  
+- Lightweight statistics (min, max, null counts) for each column  
+
+### 2. Row Data
+- The actual compressed values  
+- Stored in separate streams per column  
+
+### 3. Stripe Footer
+- Directory of stream locations  
+- Encoding information  
+
+This structure enables efficient pruning, parallel processing, and compression.
+
+---
+
+# Key Performance Advantages
+
+## 1. Aggressive Compression
+
+ORC is known for superior compression efficiency and often produces smaller file sizes than Parquet.
+
+- Can reduce footprint by up to **75% vs raw data**
+- Columns are separated into distinct streams
+- Uses specialized streams like:
+
+### PRESENT Stream
+- Boolean bitmap for null handling  
+- Prevents null values from interrupting data streams  
+- Improves compression effectiveness  
+
+---
+
+## 2. Advanced Indexing and Bloom Filters
+
+One of ORC’s standout features is built-in **Bloom filters**.
+
+These allow query engines to:
+
+- Probabilistically test whether a value exists in a stride  
+- Skip large chunks of data even in unsorted datasets  
+
+A **stride** typically contains ~10,000 rows.
+
+This is particularly useful for:
+
+- Highly selective point lookups  
+- Queries where Parquet's min/max statistics overlap and cannot prune effectively  
+
+---
+
+## 3. Vectorized Execution
+
+ORC is optimized for **vectorized processing**.
+
+Engines like:
+
+- Apache Hive  
+- Trino  
+
+Can process multiple rows simultaneously using a single CPU instruction.
+
+This significantly speeds up:
+
+- Large-scale aggregations  
+- Analytical queries  
+
+---
+
+## 4. Native ACID Support
+
+ORC was a pioneer in supporting **ACID transactions** within the Hadoop ecosystem.
+
+Supports:
+
+- Atomicity  
+- Consistency  
+- Isolation  
+- Durability  
+
+This makes ORC a strong choice for data warehouses requiring:
+
+- Frequent updates  
+- Deletes  
+- Transactional consistency  
+
+---
+
+# When to Choose ORC over Parquet
+
+The decision depends on ecosystem and query patterns.
+
+---
+
+## Ecosystem Considerations
+
+Choose ORC if:
+
+- Your environment is Hadoop-centric  
+- You rely heavily on Apache Hive  
+- You use Trino for querying  
+
+Choose Parquet if:
+
+- You require broad compatibility  
+- You use Spark, BigQuery, or Snowflake  
+- You operate in cloud-first architectures  
+
+---
+
+## Query Type
+
+ORC often performs better for:
+
+- Selective filters  
+- Point lookups  
+- Random access on unsorted data  
+
+Parquet excels at:
+
+- Wide-table scans  
+- Complex nested data structures  
+- General-purpose analytics  
+
+---
+
+## Storage Constraints
+
+If minimizing cloud storage cost is critical:
+
+- ORC’s compression (especially with **Zlib**) may provide a slight advantage
+- Suitable for archival or cost-sensitive datasets  
+
+---
+
+# Modern Architecture Pattern
+
+A common modern lakehouse approach:
+
+### Ingestion (Bronze Layer)
+→ **Avro**
+- Streaming
+- Write-heavy workloads
+
+### Analytical Layer (Silver/Gold)
+→ **Parquet or ORC**
+
+Choice depends on primary query engine:
+
+- Spark-heavy → Parquet  
+- Hive/Trino-heavy → ORC  
+
+---
+
+# Summary
+
+Choose ORC when:
+
+- You operate in a Hive-centric ecosystem  
+- You require aggressive pruning and indexing  
+- Compression efficiency is a top priority  
+- ACID support is required  
+
+Choose Parquet when:
+
+- Broad compatibility is required  
+- Nested data is common  
+- You need general-purpose analytical performance  
+
+---
+
+If needed, you can extend this into a full comparison including:
+
+- ORC vs Parquet benchmarking methodology  
+- Bloom filter deep dive  
+- Compression strategy comparison  
+- Lakehouse design recommendations  
