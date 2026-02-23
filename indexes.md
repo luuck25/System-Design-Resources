@@ -162,24 +162,8 @@ graph LR
 
 <img width="523" height="239" alt="image" src="https://github.com/user-attachments/assets/d5e7260d-a277-4fce-b029-011db8624fbb" />
 
-------------------------------------------------------------------------
+<img width="737" height="410" alt="image" src="https://github.com/user-attachments/assets/198caed7-ed3d-4fc9-915a-ed903da71344" />
 
-# Comparison Table
-
-  -----------------------------------------------------------------------
-  Feature             Dense Index              Sparse Index
-  ------------------- ------------------------ --------------------------
-  Index Entries       One per search-key value One per block / some
-                                               values
-
-  Search Speed        Faster (direct access)   Slower (requires scan)
-
-  Space Required      High                     Low
-
-  Maintenance Cost    High                     Lower
-
-  Data Requirement    No sorting required      Requires sorted data file
-  -----------------------------------------------------------------------
 
 ------------------------------------------------------------------------
 
