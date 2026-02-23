@@ -177,4 +177,44 @@ sequential scanning after lookup.
 
 ------------------------------------------------------------------------
 
-END
+# Hash File Organization
+
+In **Hash File Organization**, the physical address of a record on the disk is determined by a mathematical formula called a **Hash Function**.
+
+---
+
+## 1. How it Works
+Instead of searching through an index or sorting the file, the database applies a function to the **Hash Key** (usually a Primary Key) to find the "Bucket" where the record is stored.
+
+* **Hash Function ($h$):** A formula such as $h(K) = K \pmod{n}$, where $n$ is the number of buckets.
+* **Bucket:** A unit of storage (usually one or more disk blocks) that holds multiple records.
+
+---
+
+## 2. Diagram: Hash Mapping Process
+This diagram shows how different IDs are mapped to specific disk buckets using a simple modulo function.
+
+```mermaid
+graph LR
+    subgraph Keys [Search Keys]
+        K1[ID: 101]
+        K2[ID: 102]
+        K3[ID: 111]
+    end
+
+    subgraph Logic [Hash Function: ID % 10]
+        HF[Math Calculation]
+    end
+
+    subgraph Storage [Disk Buckets]
+        B1[Bucket 1: Records 101, 111]
+        B2[Bucket 2: Record 102]
+        B0[Bucket 0: Empty]
+    end
+
+    K1 --> HF
+    K2 --> HF
+    K3 --> HF
+    HF --> B1
+    HF --> B2
+```
