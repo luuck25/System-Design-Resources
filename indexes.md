@@ -259,6 +259,9 @@ graph TD
     end
 ```
 
+<img width="707" height="597" alt="image" src="https://github.com/user-attachments/assets/a72bc87f-e946-4d8c-a070-83b73afedf8b" />
+
+
 ## Non-Clustered Index
 A Non-Clustered Index is a separate structure from the data rows. It contains the index keys and pointers (Row IDs) to the actual data.
 
@@ -285,6 +288,7 @@ A Non-Clustered Index is a separate structure from the data rows. It contains th
     P2 -.-> R2
     P3 -.-> R3
 ```
+<img width="848" height="750" alt="image" src="https://github.com/user-attachments/assets/d13a31e8-2cd7-4445-ba8f-427f6d3fc4ac" />
 
 ## Multi-Level Indexing
 As a database grows, the index itself becomes too large to fit into a single memory block. Multi-Level Indexing solves this by creating a hierarchy of indexes.
