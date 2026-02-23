@@ -290,6 +290,23 @@ A Non-Clustered Index is a separate structure from the data rows. It contains th
 ```
 <img width="848" height="750" alt="image" src="https://github.com/user-attachments/assets/d13a31e8-2cd7-4445-ba8f-427f6d3fc4ac" />
 
+
+```mermaid
+graph TD
+    subgraph Clustered_Index [Clustered: Index = Data]
+        C1[Key 101] --> D1[Actual Row 101 Data]
+        C2[Key 102] --> D2[Actual Row 102 Data]
+    end
+
+    subgraph NonClustered_Index [Non-Clustered: Index = Pointer]
+        N1[Author: Orwell] --> P1[Pointer to Key 101]
+        N2[Author: Tolkien] --> P2[Pointer to Key 102]
+    end
+
+    P1 -.-> D1
+    P2 -.-> D2
+```
+    
 ## Multi-Level Indexing
 As a database grows, the index itself becomes too large to fit into a single memory block. Multi-Level Indexing solves this by creating a hierarchy of indexes.
 
