@@ -218,3 +218,19 @@ graph LR
     HF --> B1
     HF --> B2
 ```
+## 3. Key Concepts: Collisions & Overflow
+
+> **Collision:** > Occurs when two different search keys result in the same hash value (e.g., in an `ID % 10` function, both **101** and **111** result in a hash of **1**).
+
+> **Bucket Overflow:** > When a bucket reaches its maximum capacity, the database creates an **Overflow Chain** (a linked list of blocks). If chains become too long, the "instant" search speed advantage is lost because the database must scan the linked list.
+
+---
+
+## 4. Pros and Cons
+
+| Feature | Hash File Organization |
+| :--- | :--- |
+| **Search Speed** | **Extremely Fast** for exact matches (Direct access via $O(1)$ complexity). |
+| **Range Queries** | **Very Bad.** Since data is scattered randomly, a query like `BETWEEN 1 AND 10` requires scanning the entire file. |
+| **Space Efficiency** | Can be wasteful if buckets are poorly distributed or many remain empty. |
+| **Best Use Case** | Unique lookups, such as finding a user by a **Username**, **SSN**, or **Internal ID**. |
