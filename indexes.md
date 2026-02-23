@@ -528,3 +528,64 @@ graph TD
 | **Range Queries** | Slower (requires traversing up and down branches). | **Very Fast** (follows the linked leaf list at the bottom). |
 | **Internal Node Fill** | Stores keys and actual data (takes more space). | Stores keys only (fits more keys per block/page). |
 | **Standard Use** | General file systems. | **Relational Databases (RDBMS).** |
+
+
+# LSM Trees: Optimized for High-Speed Writing
+
+An **LSM Tree** is a data structure designed to handle heavy write workloads. Instead of updating a file every time a piece of data comes in (which is slow), it stores data in stages.
+
+---
+
+## 1. How it Works (The Layman Explanation)
+Imagine you are sorting a massive pile of mail:
+
+1.  **The Notepad (MemTable):** As mail arrives, you quickly write the info down on a notepad in your hand. This is fast because you aren't walking to the filing cabinet yet.
+2.  **The Shoebox (SSTables):** Once your notepad is full, you rip the page out and throw it into a shoebox. You don't sort the shoebox yet; you just keep adding pages.
+3.  **The Filing Cabinet (Compaction):** Once you have too many shoeboxes, you take them all out, sort them alphabetically, and merge them into one organized drawer in the filing cabinet.
+
+---
+
+## 2. Key Components
+
+| Component | Where it lives | Purpose |
+| :--- | :--- | :--- |
+| **MemTable** | RAM (Memory) | The "Waiting Room." Data is stored here first for instant speed. |
+| **WAL (Log)** | Disk | A simple list of every write. If the power goes out, the WAL helps rebuild the MemTable. |
+| **SSTable** | Disk | The "Static Files." Once the MemTable is full, it is flushed to disk as an immutable (unchangeable) file. |
+
+---
+
+## 3. The Secret Sauce: Compaction
+Because data is written into many small files (SSTables), a single record might exist in multiple places (an old version and a new version).
+
+**Compaction** is the background process that:
+1.  Reads multiple SSTables.
+2.  Discards old or deleted data (tombstones).
+3.  Merges them into one sorted, clean file.
+
+---
+
+## 4. Pros and Cons
+
+### ✅ Pros
+* **Insane Write Speed:** It never has to "seek" different parts of the disk to update a row; it just appends to the end of a log.
+* **High Throughput:** Perfect for logging, sensor data, or messaging apps.
+
+### ❌ Cons
+* **Read Penalty:** To find a record, the database might have to check the MemTable AND several SSTables.
+* **Write Amplification:** The same data is rewritten multiple times during the compaction process.
+
+---
+
+## 5. LSM Tree Visual Flow
+```mermaid
+graph TD
+    Write[Incoming Data] --> WAL[1. Write Ahead Log - Persistence]
+    Write --> Mem[2. MemTable - RAM Storage]
+    Mem -- "When Full (Flush)" --> SST1[SSTable 1 - Disk]
+    Mem -- "Next Flush" --> SST2[SSTable 2 - Disk]
+    
+    SST1 --> Comp[3. Compaction Process]
+    SST2 --> Comp
+    Comp --> BigSST[Final Organized Sorted File]
+```
