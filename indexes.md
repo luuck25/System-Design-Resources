@@ -234,3 +234,84 @@ graph LR
 | **Range Queries** | **Very Bad.** Since data is scattered randomly, a query like `BETWEEN 1 AND 10` requires scanning the entire file. |
 | **Space Efficiency** | Can be wasteful if buckets are poorly distributed or many remain empty. |
 | **Best Use Case** | Unique lookups, such as finding a user by a **Username**, **SSN**, or **Internal ID**. |
+
+# Advanced Indexing: Clustered, Non-Clustered, and Multi-Level
+
+## 1. Clustered Index
+A **Clustered Index** defines the physical order in which data is stored in a table. 
+
+* **The Rule:** Since data can only be sorted in one way, you can have only **one** Clustered Index per table.
+* **Mechanism:** The leaf nodes of a clustered index contain the **actual data rows**.
+* **Analogy:** A Phone Book. The data is physically organized alphabetically by name.
+
+### Diagram: Clustered Index
+```mermaid
+graph TD
+    subgraph Index_Nodes [B-Tree Structure]
+        Root[Root Node] --> I1[A-M]
+        Root --> I2[N-Z]
+    end
+
+    subgraph Leaf_Nodes_is_Data [Leaf Nodes = Actual Data]
+        I1 --> D1[Row: Adam, Age 20...]
+        I1 --> D2[Row: Bob, Age 25...]
+        I2 --> D3[Row: Nora, Age 30...]
+    end
+```
+
+## Non-Clustered Index
+A Non-Clustered Index is a separate structure from the data rows. It contains the index keys and pointers (Row IDs) to the actual data.
+
+* **The Rule:** You can have multiple non-clustered indexes on one table.
+
+* **Mechanism:** The leaf node contains a pointer to the location of the data in the Clustered Index or a Heap file.
+
+* **Analogy:** The Index at the back of a textbook. The "Topic" is sorted alphabetically, but it points you to a "Page Number" (the physical location).
+```mermaid
+  graph LR
+    subgraph NC_Index [Non-Clustered Index on 'Age']
+        A1[Age 20] --> P1[Pointer to Row 1]
+        A2[Age 25] --> P2[Pointer to Row 2]
+        A3[Age 30] --> P3[Pointer to Row 3]
+    end
+
+    subgraph Actual_Table [Physical Table Data]
+        R1[Row 1: Adam, 20]
+        R2[Row 2: Bob, 25]
+        R3[Row 3: Nora, 30]
+    end
+
+    P1 -.-> R1
+    P2 -.-> R2
+    P3 -.-> R3
+```
+
+## Multi-Level Indexing
+As a database grows, the index itself becomes too large to fit into a single memory block. Multi-Level Indexing solves this by creating a hierarchy of indexes.
+
+How it works:
+
+Inner Index (Primary Index): Points to the data blocks.
+
+Outer Index: Points to the blocks of the Inner Index.
+
+This reduces the number of disk accesses significantly. Instead of scanning a massive index, you navigate a small "map of the map."
+```mermaid
+graph TD
+    subgraph Level_1 [Outer Index / Root]
+        Root[Entries 1 - 1000]
+    end
+
+    subgraph Level_2 [Inner Index / Intermediate]
+        Root --> L2_A[1 - 500]
+        Root --> L2_B[501 - 1000]
+    end
+
+    subgraph Level_3 [Leaf Nodes / Pointers]
+        L2_A --> L3_1[1-100]
+        L2_A --> L3_2[101-200]
+        L2_B --> L3_3[501-600]
+    end
+
+    L3_1 --> Data[Actual Data Block]
+```
