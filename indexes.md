@@ -90,6 +90,9 @@ graph LR
     I3 --> R3
     I4 --> R4
 ```
+
+<img width="508" height="260" alt="image" src="https://github.com/user-attachments/assets/f04e7eb1-3d1b-46fd-96c4-d44d7441d9de" />
+
 ------------------------------------------------------------------------
 
 # 2. Sparse Index
