@@ -20,7 +20,7 @@ graph TD
     B1[Block 1: Rec 101, 102, 103] --> B2[Block 2: Rec 104, 105, 106]
     B2 --> B3[Block 3: Rec 107, 108, 109]
     end
-
+```
 # Dense vs Sparse Index (DBMS)
 
 ## Overview
