@@ -136,6 +136,31 @@ In a sparse index diagram: - Only selected keys (e.g., 10101, 32343,
 76766) appear in the index. - Each index entry points to the start of a
 block. - The system scans records sequentially within that block to find
 the target record.
+```mermaid
+graph LR
+    subgraph Sparse_Index [Index Table]
+    SI1[Key 101 -> Block 1]
+    SI2[Key 104 -> Block 2]
+    end
+
+    subgraph Data_Blocks [Physical Blocks]
+    subgraph B1 [Block 1]
+    R101[Record 101]
+    R102[Record 102]
+    R103[Record 103]
+    end
+    subgraph B2 [Block 2]
+    R104[Record 104]
+    R105[Record 105]
+    R106[Record 106]
+    end
+    end
+
+    SI1 --> B1
+    SI2 --> B2
+```
+
+<img width="523" height="239" alt="image" src="https://github.com/user-attachments/assets/d5e7260d-a277-4fce-b029-011db8624fbb" />
 
 ------------------------------------------------------------------------
 
