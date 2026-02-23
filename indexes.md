@@ -69,6 +69,26 @@ In a dense index diagram: - Every unique ID (e.g., 10101, 12121, 15151)
 appears in the index table. - Each index entry has a direct arrow
 pointing to the exact row in the data file.
 
+graph LR
+    subgraph Index_Table [Dense Index]
+    I1[Key 101 -> Ptr]
+    I2[Key 102 -> Ptr]
+    I3[Key 103 -> Ptr]
+    I4[Key 104 -> Ptr]
+    end
+
+    subgraph Data_File [Physical Records]
+    R1[Record 101]
+    R2[Record 102]
+    R3[Record 103]
+    R4[Record 104]
+    end
+
+    I1 --> R1
+    I2 --> R2
+    I3 --> R3
+    I4 --> R4
+    
 ------------------------------------------------------------------------
 
 # 2. Sparse Index
