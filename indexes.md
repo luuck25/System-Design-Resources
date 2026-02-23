@@ -244,7 +244,7 @@ A **Clustered Index** defines the physical order in which data is stored in a ta
 * **Mechanism:** The leaf nodes of a clustered index contain the **actual data rows**.
 * **Analogy:** A Phone Book. The data is physically organized alphabetically by name.
 
-  ** DATA IS SORTED in CLUSTERED INDEX HENCE IT CN DIRECTLY POINT TO DATA OR BLOCK **
+  ## DATA IS SORTED in CLUSTERED INDEX HENCE IT CN DIRECTLY POINT TO DATA OR BLOCK 
   
 ### Diagram: Clustered Index
 ```mermaid
@@ -276,8 +276,7 @@ A Non-Clustered Index is a separate structure from the data rows. It contains th
 ** DATA IS UNORDERED in NON CLUSTERED INDEX HENCE IT CONTAINS a POINTER which POINTS to where actual DATA is Present **
 
 
-**LAYMAN LANGUAGE **
-# Indexing Explained: The Library Analogy
+## LAYMAN LANGUAGE - The Library Analogy
 
 Understanding the difference between Clustered and Non-Clustered indexes is much easier when you imagine a physical library.
 
