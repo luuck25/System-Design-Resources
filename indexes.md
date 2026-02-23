@@ -68,6 +68,7 @@ data file.
 In a dense index diagram: - Every unique ID (e.g., 10101, 12121, 15151)
 appears in the index table. - Each index entry has a direct arrow
 pointing to the exact row in the data file.
+
 ```mermaid
 graph LR
     subgraph Index_Table [Dense Index]
@@ -88,7 +89,7 @@ graph LR
     I2 --> R2
     I3 --> R3
     I4 --> R4
-    ```
+```
 ------------------------------------------------------------------------
 
 # 2. Sparse Index
