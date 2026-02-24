@@ -39,25 +39,8 @@
 
 ## Complexity Comparison
 
-  Lambda                           Kappa
-  -------------------------------- --------------------
-  Two codebases (batch + stream)   Single codebase
-  Higher maintenance               Easier to maintain
-  Risk of inconsistencies          Consistent results
+<img width="674" height="566" alt="image" src="https://github.com/user-attachments/assets/28169402-9b38-4ab9-835d-95a166c77499" />
 
-------------------------------------------------------------------------
-
-## Trade-offs
-
-  Feature               Lambda                        Kappa
-  --------------------- ----------------------------- ------------------------------
-  Strength              Strong historical accuracy    Simplicity & real-time focus
-  Historical analysis   Excellent                     Slower via replay
-  Latency               Mixed                         Very low
-  Cost                  Higher                        Potentially lower
-  Best for              Fraud detection, compliance   IoT, real-time dashboards
-
-------------------------------------------------------------------------
 
 ## How Kappa Handles Historical Data
 
@@ -100,13 +83,8 @@ or nothing is committed.
 
 ## Ignore vs Overwrite During Replay
 
-  Scenario                  Action             Reason
-  ------------------------- ------------------ ------------------------------------
-  Network retry / failure   Ignore duplicate   Same event ID detected
-  Error correction          Overwrite          Same key, treated as updated truth
-  Crash during processing   Rollback           Transaction ensures consistency
+<img width="679" height="171" alt="image" src="https://github.com/user-attachments/assets/7473768a-627a-4afa-899f-aa8dc77caacf" />
 
-------------------------------------------------------------------------
 
 # The Modern Middle Ground: Lambda and Kappa
 
