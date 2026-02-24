@@ -156,3 +156,53 @@ Choose based on: - Required latency - Operational complexity tolerance -
 Historical vs real-time priority
 
 <img width="1206" height="682" alt="image" src="https://github.com/user-attachments/assets/8af8c796-93e4-43aa-90d0-4559ea9c6cd3" />
+
+
+# Can u explain in more detail and simple words, exactly once, say out of 100 spark task, 2 are failing and rerun, how it will handle
+
+## How Spark Handles Failing Tasks (Exactly-Once)
+
+In a normal system, those 2 cooks might accidentally put a "half-finished" plate on the table before they dropped it, leading to a mess. Spark prevents this using **Two-Step Commit** and **Temporary Files**.
+
+---
+
+### Step 1: Writing to a "Secret Location" (The Sandbox)
+When Spark starts 100 tasks, it doesn't let them write directly to the final database or folder. Instead, each task writes its result to a **private, temporary folder**.
+
+* **Task #99** is working in `/temp/task_99_attempt_1/`
+* **Task #100** is working in `/temp/task_100_attempt_1/`
+
+### Step 2: The Failure & The Rerun
+If Task #99 and #100 crash (maybe the network blipped), Spark **ignores everything** in those two temporary folders. It treats them like they never existed.
+
+* Spark then launches **Task #99 (Attempt 2)**.
+* This new task starts completely fresh, writing to a new folder: `/temp/task_99_attempt_2/`.
+
+### Step 3: The "Commit" (The Exactly-Once Magic)
+Only when a task signals *"I am 100% finished and the data is perfect,"* does the Spark Driver move the data.
+
+* **For the 98 successful tasks:** Spark "commits" them (moves the file from the temp folder to the final folder).
+* **For the 2 failed tasks:** Spark waits until the **rerun (Attempt 2)** is finished. Once Attempt 2 succeeds, Spark commits that version and deletes the "garbage" left behind by the failed Attempt 1.
+
+---
+
+### In "Production" Terms (The Delta Lake / Idempotent way)
+If you are writing to a database (like the Delta Lake code I showed you), it uses a **Transaction Log**.
+
+* **The Log:** Before any data is changed, Spark writes a note in a log file: *"I am starting Job #123 with 100 tasks."*
+* **The Rerun:** If tasks 99 and 100 fail and rerun, they still carry the **"Job #123" ID**.
+* **The Final Check:** The database looks at the incoming data. If it sees data from Task 99 (Attempt 1) trying to sneak in, but the Log says *"Attempt 1 failed, use Attempt 2,"* the database **rejects Attempt 1**.
+
+---
+
+### Summary: Why you don't get duplicates
+* **Failed tasks are "Invisible":** Their partial work is hidden in temp folders or ignored by the transaction log.
+* **Successful tasks are "Atomic":** They only appear in the final destination when they are 100% done.
+* **The Driver is the "Boss":** It keeps a master list of which "Attempt ID" is the winner. If a failed task suddenly wakes up and tries to write data later, the Boss says, *"Too late, I already accepted Attempt 2. Your data is trash."*
+
+---
+
+### One Catch: The "External Side Effect"
+Exactly-once only works if the **Sink** (the place you are writing to) supports transactions (like Delta Lake, Iceberg, or SQL).
+
+If your Spark task sends an **Email** or a **Push Notification**, and that task fails and reruns... the user will get **two emails**. Spark can't "undo" an email once it's sent! This is why for Kappa architecture, we always try to write to a "Smart" database that can handle these re-runs.
