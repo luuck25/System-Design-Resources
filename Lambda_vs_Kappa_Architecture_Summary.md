@@ -79,6 +79,8 @@ same floor once.
 Read → Process → Write happens atomically. Either everything succeeds,
 or nothing is committed.
 
+<img width="693" height="798" alt="image" src="https://github.com/user-attachments/assets/9ec3ee0b-ba4d-4a7f-a40b-95aac543ca81" />
+
 ------------------------------------------------------------------------
 
 ## Ignore vs Overwrite During Replay
