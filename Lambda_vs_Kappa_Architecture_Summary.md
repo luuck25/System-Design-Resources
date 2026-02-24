@@ -158,7 +158,8 @@ Historical vs real-time priority
 <img width="1206" height="682" alt="image" src="https://github.com/user-attachments/assets/8af8c796-93e4-43aa-90d0-4559ea9c6cd3" />
 
 
-# Can u explain in more detail and simple words, exactly once, say out of 100 spark task, 2 are failing and rerun, how it will handle
+
+## Can u explain in more detail and simple words, exactly once, say out of 100 spark task, 2 are failing and rerun, how it will handle
 
 ## How Spark Handles Failing Tasks (Exactly-Once)
 
