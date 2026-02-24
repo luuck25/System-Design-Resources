@@ -154,3 +154,5 @@ Also called **Batch-Oriented Architecture**.
 
 Choose based on: - Required latency - Operational complexity tolerance -
 Historical vs real-time priority
+
+<img width="1206" height="682" alt="image" src="https://github.com/user-attachments/assets/8af8c796-93e4-43aa-90d0-4559ea9c6cd3" />
