@@ -19,7 +19,8 @@ At its core, Kafka organizes data logically and physically to ensure high perfor
 
 ### 2. Kafka Connect
 
-![Uploading image.png…]()
+<img width="801" height="411" alt="image" src="https://github.com/user-attachments/assets/dfcfe9d7-f6fc-4465-b871-67e76b6acaee" />
+
 
 
 
