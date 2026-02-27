@@ -22,7 +22,7 @@ At its core, Kafka organizes data logically and physically to ensure high perfor
 * **Topics:** A logical name used to group messages, similar to a table in a database.
 * **Partitions:** To handle massive volumes of data, topics are divided into partitions, which are physical directories on the broker. This allows for parallel processing.
 * **Replication:** Each partition has a Replication Factor (the number of copies maintained). Replicas are classified as Leaders (handling all requests) or Followers (passive duplicates for redundancy).
-* **Log Segments:** Instead of one massive file, partitions are split into smaller files called segments.
+* **Log Segments:** It is actual file where topic/partition data is written. Instead of one massive file, partitions are split into smaller files called segments.
 * **Offsets:** Every message in a partition is assigned a unique 64-bit integer offset, which serves as its unique ID within that partition.
 
 ---
