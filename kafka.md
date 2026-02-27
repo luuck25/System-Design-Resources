@@ -1,3 +1,7 @@
+![Uploading image.png…]()
+
+
+
 # Apache Kafka Architecture Overview
 
 
@@ -109,3 +113,4 @@ The interaction between these components typically follows specific patterns:
 * **Brokers** store these messages in **Log Segments** and replicate them to **Follower Partitions** for redundancy.
 * **Consumer Groups** (or **Sink Connectors**) pull data from these partitions. The broker acts as a middleman, acknowledging receipts from producers and delivering messages to consumers upon request.
 * **Kafka Streams/KSQL** act as high-level consumers that read from input topics, perform real-time processing (like joins or aggregates), and often produce the results back into new Kafka topics.
+
