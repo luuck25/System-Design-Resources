@@ -1,4 +1,3 @@
-![Uploading image.png…]()
 
 
 
@@ -6,6 +5,8 @@
 
 
 The architecture of **Apache Kafka** is designed as a horizontally scalable, fault-tolerant, distributed streaming platform primarily intended for building real-time streaming data architectures. It functions as a messaging broker that acts as a middleman between producers and consumers, responsible for receiving, storing, and delivering messages.
+
+<img width="976" height="492" alt="image" src="https://github.com/user-attachments/assets/a8858d7e-203e-4e85-9754-c8c8944d50db" />
 
 
 The following sections detail the core components and their interactions:
