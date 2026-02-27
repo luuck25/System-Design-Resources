@@ -19,13 +19,13 @@ At its core, Kafka organizes data logically and physically to ensure high perfor
 
 ### 2. Kafka Connect
 
-![Uploading image.png…]()
-
 Kafka Connect is a component used for moving data between Kafka and external systems (like databases or cloud storage) without writing code.
 
 * **Architecture:** It runs as a cluster of Workers, which are the main "workhorses" that act as containers for processes.
 * **Connectors & Tasks:** A Connector (Source or Sink) determines how to split the data-copying work into parallel Tasks.
 * **Interaction:** The Task is responsible for interacting with the external system (reading/writing), while the Worker handles the actual communication (sending/receiving records) with the Kafka cluster.
+
+![Uploading image.png…]()
 
 ---
 
