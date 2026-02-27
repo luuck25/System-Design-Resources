@@ -20,9 +20,6 @@ The following sections detail the core components and their interactions:
 
 
 
-
-![Uploading image.png…]()
-
 ### 1. Storage Architecture: Topics, Partitions, and Segments
 At its core, Kafka organizes data logically and physically to ensure high performance and reliability.
 
