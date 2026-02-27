@@ -151,7 +151,7 @@ What happens if a producer sends a message, but the network glitches before the 
 * **What it is:** **Idempotent Producers** (turned **ON** by default since Kafka 3.0).
 * **Key Concept:** The broker assigns a unique **Producer ID** and **Sequence Number** to every message. If the broker receives a duplicate sequence number, it ignores it.
 * **Why it matters:** This is the foundation of **Exactly-Once Semantics (EOS)**, ensuring that your data remains accurate even during network failures or server crashes.
-
+```scala
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -204,3 +204,4 @@ object KafkaStreamingApp {
     query.awaitTermination()
   }
 }
+```
