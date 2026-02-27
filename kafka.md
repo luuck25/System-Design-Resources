@@ -151,3 +151,56 @@ What happens if a producer sends a message, but the network glitches before the 
 * **What it is:** **Idempotent Producers** (turned **ON** by default since Kafka 3.0).
 * **Key Concept:** The broker assigns a unique **Producer ID** and **Sequence Number** to every message. If the broker receives a duplicate sequence number, it ignores it.
 * **Why it matters:** This is the foundation of **Exactly-Once Semantics (EOS)**, ensuring that your data remains accurate even during network failures or server crashes.
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+
+object KafkaStreamingApp {
+  def main(args: Array[String]): Unit = {
+
+    // 1. Initialize Spark Session
+    val spark = SparkSession.builder()
+      .appName("ScalaKafkaStreaming")
+      .master("local[*]") // Use [*] for all local cores, or remove for cluster submit
+      .getOrCreate()
+
+    import spark.implicits._ // Enables $-notation and Dataset encoders
+
+    // 2. Define Schema for JSON payload
+    val orderSchema = new StructType()
+      .add("order_id", StringType)
+      .add("amount", DoubleType)
+      .add("customer_id", StringType)
+      .add("timestamp", TimestampType)
+
+    // 3. Read from Kafka
+    val kafkaRawDF = spark.readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("subscribe", "orders-topic")
+      .option("startingOffsets", "earliest")
+      // Production Security (Optional)
+      // .option("kafka.security.protocol", "SASL_SSL")
+      // .option("kafka.sasl.mechanism", "PLAIN")
+      .load()
+
+    // 4. Transform: Binary -> String -> JSON -> Columns
+    val processedDF = kafkaRawDF
+      .selectExpr("CAST(value AS STRING) as json_payload")
+      .select(from_json($"json_payload", orderSchema).as("data"))
+      .select("data.*")
+      .filter($"amount" > 500.0) // Filter high-value orders
+
+    // 5. Write Result to Console (or Sink)
+    val query = processedDF.writeStream
+      .outputMode("append")
+      .format("console")
+      // CRITICAL: The "Bookmark" folder that replaces Group ID
+      .option("checkpointLocation", "path/to/checkpoint/dir") 
+      .trigger(org.apache.spark.sql.streaming.Trigger.ProcessingTime("10 seconds"))
+      .start()
+
+    query.awaitTermination()
+  }
+}
