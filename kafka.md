@@ -19,7 +19,8 @@ At its core, Kafka organizes data logically and physically to ensure high perfor
 
 ### 2. Kafka Connect
 
-<img width="912" height="431" alt="image" src="https://github.com/user-attachments/assets/3af0c868-eed2-4e30-9d0e-b2bdc19add49" />
+<img width="966" height="483" alt="image" src="https://github.com/user-attachments/assets/13c02dcc-9656-4bb7-be67-669370279d4f" />
+
 
 
 Kafka Connect is a component used for moving data between Kafka and external systems (like databases or cloud storage) without writing code.
