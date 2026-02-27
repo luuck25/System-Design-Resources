@@ -6,6 +6,16 @@ The following sections detail the core components and their interactions:
 
 ---
 
+
+<img width="330" height="221" alt="image" src="https://github.com/user-attachments/assets/964b6dbc-399e-4bc6-9425-19cf09af970b" />
+
+<img width="212" height="168" alt="image" src="https://github.com/user-attachments/assets/55f3df21-a08c-4691-9a48-3f1af0459670" />
+
+<img width="379" height="187" alt="image" src="https://github.com/user-attachments/assets/d09f9623-d025-4253-bde5-5de08d9cf75e" />
+
+<img width="805" height="324" alt="image" src="https://github.com/user-attachments/assets/4850c81a-2b3f-4529-998f-820c24b6ece4" />
+
+
 ### 1. Storage Architecture: Topics, Partitions, and Segments
 At its core, Kafka organizes data logically and physically to ensure high performance and reliability.
 
@@ -20,6 +30,7 @@ At its core, Kafka organizes data logically and physically to ensure high perfor
 ### 2. Kafka Connect
 
 Kafka Connect is a component used for moving data between Kafka and external systems (like databases or cloud storage) without writing code.
+
 <img width="798" height="392" alt="image" src="https://github.com/user-attachments/assets/44559b17-83cd-4c52-bb65-851cbdfe1fc3" />
 
 * **Architecture:** It runs as a cluster of Workers, which are the main "workhorses" that act as containers for processes.
@@ -43,6 +54,15 @@ KSQL provides an SQL interface to Kafka Streams, allowing users to create stream
 * **Components:** It consists of a KSQL Engine (which parses statements and builds Kafka Streams topologies) and a REST Interface for client communication.
 * **Interaction:** KSQL servers run "streams tasks" internally, communicating with the Kafka cluster to read inputs and write outputs.
 
+
+<img width="443" height="152" alt="image" src="https://github.com/user-attachments/assets/468efbec-70d2-4a48-9d22-c1e0037a1c1d" />
+
+<img width="375" height="170" alt="image" src="https://github.com/user-attachments/assets/1c51128c-5409-47a8-9e63-c9ba542ce0c2" />
+
+<img width="356" height="156" alt="image" src="https://github.com/user-attachments/assets/98bf3de8-8281-4ad1-b368-75b91759f0e0" />
+
+
+
 ---
 
 In addition to the components previously discussed, **Consumer Groups** are a fundamental part of Kafka’s architecture, specifically designed to handle scalability and fault tolerance during data consumption.
@@ -52,12 +72,22 @@ In addition to the components previously discussed, **Consumer Groups** are a fu
 ### 6. Consumer Groups and Scalability
 While a single consumer can read from a topic, Kafka uses Consumer Groups to allow a pool of consumers to share the workload of processing messages from a topic.
 
+
+<img width="786" height="334" alt="image" src="https://github.com/user-attachments/assets/630a6189-c4c0-477c-99c9-095d0a275e46" />
+
+
+
 * **Parallel Processing:** To scale consumption, you add more consumers to a consumer group. This works in tandem with partitions; for instance, if a topic has three partitions, Kafka can assign each partition to a different consumer within the same group, allowing them to process data in parallel.
 * **Workload Distribution:** Each consumer in a group is responsible for a specific subset of partitions. If you add more consumers than there are partitions, those extra consumers will remain idle as "over-provisioned" capacity.
 * **Fault Tolerance:** If an active consumer instance fails or goes down, the Kafka framework automatically reassigns its partitions to the remaining members of the group. This ensures that data processing continues transparently without manual intervention.
 * **Group ID Mechanism:** This logic is so central to Kafka that other components, such as Kafka Connect Workers, use the same Group ID mechanism to form their own clusters and manage task reassignment.
 
+
 ---
+
+
+<img width="803" height="416" alt="image" src="https://github.com/user-attachments/assets/21a3383f-e3fb-4d87-afa5-83d12f6fe92f" />
+
 
 ### 7. Consumer Interaction and Offsets
 The interaction between consumers and brokers is driven by the concept of offsets, which are unique 64-bit integer IDs assigned to every message in a partition.
