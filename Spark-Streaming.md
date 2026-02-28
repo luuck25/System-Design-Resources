@@ -76,7 +76,7 @@ Stateful operations (like running totals or sessionization) require Spark to rem
 | :--- | :--- | :--- |
 | **Micro-Batch** (Default) | 100ms - 2s | Most stable; supports all operations and complex joins. |
 | **Continuous Processing** | ~1ms | Experimental; ultra-low latency but supports limited operations. |
-| **AvailableNow** | N/A | Processes all available data in batches and then shuts down (Cost-effective for non-24/7 jobs). |
+| **AvailableNow** (Once) | N/A | Processes all available data in batches and then shuts down (Cost-effective for non-24/7 jobs). |
 
 ### Output Modes: How to Write Data
 1.  **Append Mode:** Only new rows are written (Best for simple logging).
