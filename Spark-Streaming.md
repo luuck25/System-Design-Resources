@@ -6,6 +6,9 @@ This guide explores the architecture of a real-time fraud detection system and b
 
 ## 🛡️ End-to-End Use Case: Real-Time Fraud Detection
 
+<img width="955" height="539" alt="image" src="https://github.com/user-attachments/assets/7b2dc8f4-8848-49e0-b11b-f2942f689843" />
+
+
 In financial services, the window to stop fraud is measured in milliseconds. This pipeline identifies and blocks suspicious activity before a transaction is even finalized.
 
 ### 1. Data Ingestion (The Pulse)
