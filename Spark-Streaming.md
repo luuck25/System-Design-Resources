@@ -56,7 +56,10 @@ Stateful operations (like running totals or sessionization) require Spark to rem
 ### 5. Event Time vs. Processing Time
 * **Event Time:** When the event actually happened (the timestamp on the receipt). This is what you should almost always use for business logic.
 * **Processing Time:** When the data hit the Spark cluster. Using this for logic can lead to inaccurate results if there are ingestion delays.
+  
+### 5. Exactly-Once Semantics
 
+Spark ensures that even if a job fails, the final output is the same as if the data had been processed exactly once without any loss or duplication. This is achieved through the coordination of replayable sources (like Kafka), idempotent sinks (which can handle repeated writes of the same data), and the checkpointing/write-ahead log system
 ---
 
 ## ⚙️ Execution & Operational Modes
