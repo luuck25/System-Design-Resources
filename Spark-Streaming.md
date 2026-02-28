@@ -225,3 +225,38 @@ Key: {user_id: "user_2"} -> Value: {count: 3}
 | offsets/ | Defines batch boundaries | Potential data loss; Spark doesn't know where to start. |
 | commits/ | Confirms batch completion | Duplicates! Spark re-processes the last successful batch. |
 | state/ | Long-term memory | Aggregates reset. Current counts or join windows go back to 0. |
+
+
+# ⚡ Deep Dive: `maxOffsetsPerTrigger` in Spark Structured Streaming
+
+The `maxOffsetsPerTrigger` option is a rate-limiting configuration used primarily with the **Apache Kafka** source. It defines the **maximum number of records** Spark will pull from Kafka in a single micro-batch.
+
+---
+
+## 🛠️ 1. Why is this Configuration Critical?
+
+Without this setting, Spark will attempt to read **all available data** in the Kafka topic during the very first micro-batch. This leads to several production issues:
+
+1.  **The "Death Spiral" (OOM):** If your job has been down for 24 hours and there are 100 million pending records, Spark will try to pull all 100M into memory at once, causing an **Out of Memory (OOM)** error.
+2.  **Unpredictable Batch Durations:** One batch might take 2 seconds, while the next (after a data spike) might take 2 hours, making monitoring impossible.
+3.  **Resource Starvation:** A massive batch will hog all cluster resources, preventing other jobs from running effectively.
+
+---
+
+## 💻 2. Sample Code Implementation
+
+You apply this option directly to the `readStream` configuration.
+
+```python
+# Configuring a rate-limited Kafka stream
+kafka_stream_df = spark.readStream \
+    .format("kafka") \
+    .option("kafka.bootstrap.servers", "localhost:9092") \
+    .option("subscribe", "transactions-topic") \
+    .option("startingOffsets", "earliest") \
+    # --- THE RATE LIMITER ---
+    .option("maxOffsetsPerTrigger", 50000) \
+    .load()
+
+# This ensures Spark reads a MAXIMUM of 50,000 records total 
+# across all partitions in every micro-batch.
