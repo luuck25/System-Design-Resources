@@ -35,6 +35,9 @@ Predictions are pushed to specific "Sinks":
 
 ## 🏗️ Core Architectural Concepts
 
+<img width="1488" height="811" alt="image" src="https://github.com/user-attachments/assets/0fa0d05b-e842-4c67-89a1-e0dd2ab46e80" />
+
+
 ### 1. The Unbounded Table Abstraction
 Spark eliminates the mental overhead of "streaming." You write your logic as if you were querying a static table. The engine is responsible for **incrementalization**—determining exactly what changed since the last trigger and updating the results accordingly.
 
