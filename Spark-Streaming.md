@@ -227,6 +227,8 @@ Key: {user_id: "user_2"} -> Value: {count: 3}
 | state/ | Long-term memory | Aggregates reset. Current counts or join windows go back to 0. |
 
 
+
+
 # ⚡ Deep Dive: `maxOffsetsPerTrigger` in Spark Structured Streaming
 
 The `maxOffsetsPerTrigger` option is a rate-limiting configuration used primarily with the **Apache Kafka** source. It defines the **maximum number of records** Spark will pull from Kafka in a single micro-batch.
