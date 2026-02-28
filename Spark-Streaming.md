@@ -38,10 +38,17 @@ Predictions are pushed to specific "Sinks":
 ### 1. The Unbounded Table Abstraction
 Spark eliminates the mental overhead of "streaming." You write your logic as if you were querying a static table. The engine is responsible for **incrementalization**—determining exactly what changed since the last trigger and updating the results accordingly.
 
-### 2. Checkpointing: The "Save Game" Feature
+### 2. Checkpointing: The "Save Game" Feature & Write-Ahead Logs
 Checkpointing is the backbone of fault tolerance. 
 * **How it works:** Spark periodically saves the state of the query (offsets, intermediate aggregates) to reliable storage like S3 or HDFS.
+  
 * **Why it matters:** If a cluster node fails, Spark restarts from the last "save point" rather than re-processing data from the beginning of time. This ensures **Exactly-Once Semantics**.
+  
+* **The WAL:** Before Spark even starts processing a batch, it writes the intended "plan" (which offsets it is about to read) to a Write-Ahead Log in reliable storage (S3/HDFS).
+
+* **The Commit:** Only after the sink confirms the data is safely written does Spark mark that batch as "Completed" in the checkpoint.
+
+* **Recovery:** Upon restart, Spark looks at the log. If it sees a batch was "started" but never "committed," it re-runs that exact batch.
 
 ### 3. Watermarking: Managing "The Late Arrivals"
 In the real world, network lag happens. A transaction made at 10:00 AM might not reach Spark until 10:05 AM.
