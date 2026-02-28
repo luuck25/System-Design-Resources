@@ -51,6 +51,7 @@ In the real world, network lag happens. A transaction made at 10:00 AM might not
 ### 4. State Management (The State Store)
 Stateful operations (like running totals or sessionization) require Spark to remember data across batches. 
 * **State Store:** Spark uses an internal provider—usually **RocksDB**—to manage this "memory." This allows the system to handle millions of unique keys (e.g., individual user balances) without crashing.
+* **Stateless Operations:** These are simple transformations like filter() or map() where each record is processed independently
 
 ### 5. Event Time vs. Processing Time
 * **Event Time:** When the event actually happened (the timestamp on the receipt). This is what you should almost always use for business logic.
