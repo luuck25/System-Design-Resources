@@ -84,6 +84,14 @@ Stateful operations (like running totals or sessionization) require Spark to rem
 3.  **Complete Mode:** The entire result table is recalculated and overwritten (Useful for small global aggregates).
 
 ### Triggers: The "When"
+Triggers define the timing of data processing:
+
+**Default:** Processes the next micro-batch as soon as the previous one finishes.
+**Processing Time:** Triggers at fixed intervals (e.g., every 10 seconds).
+**Once:** Processes all available data and then stops the query.
+**Available Now:** A more efficient version of "Once" that processes all available data but splits it into multiple smaller micro-batches to reduce load.
+**Continuous:** A newer, experimental mode for row-by-row processing with extremely low latency
+
 Triggers define the cadence of execution. You can set them to run at a **fixed interval - processingTime** (e.g., every 30 seconds), **Once** (for batch-like behavior), or as fast as possible (**unspecified**).
 
 ---
