@@ -121,6 +121,7 @@ checkpoint_dir/
             ├── 1.delta     # Incremental state changes for batch 1
             ├── 2.delta     # Incremental state changes for batch 2
             └── 2.snapshot  # Full state snapshot (compacted)
+```
 
 ## 2. File Formats and Sample Records
 
