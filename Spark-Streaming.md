@@ -84,7 +84,7 @@ Stateful operations (like running totals or sessionization) require Spark to rem
 3.  **Complete Mode:** The entire result table is recalculated and overwritten (Useful for small global aggregates).
 
 ### Triggers: The "When"
-Triggers define the cadence of execution. You can set them to run at a **fixed interval** (e.g., every 30 seconds), **Once** (for batch-like behavior), or as fast as possible (**unspecified**).
+Triggers define the cadence of execution. You can set them to run at a **fixed interval - processingTime** (e.g., every 30 seconds), **Once** (for batch-like behavior), or as fast as possible (**unspecified**).
 
 ---
 
