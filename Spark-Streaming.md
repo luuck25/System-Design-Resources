@@ -59,7 +59,7 @@ Stateful operations (like running totals or sessionization) require Spark to rem
   
 ### 5. Exactly-Once Semantics
 
-Spark ensures that even if a job fails, the final output is the same as if the data had been processed exactly once without any loss or duplication. This is achieved through the coordination of replayable sources (like Kafka), idempotent sinks (which can handle repeated writes of the same data), and the checkpointing/write-ahead log system
+* **Spark** ensures that even if a job fails, the final output is the same as if the data had been processed exactly once without any loss or duplication. This is achieved through the coordination of replayable sources (like Kafka), idempotent sinks (which can handle repeated writes of the same data), and the checkpointing/write-ahead log system
 ---
 
 ## ⚙️ Execution & Operational Modes
