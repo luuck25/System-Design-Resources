@@ -68,3 +68,57 @@ Processing 10,000 files of 10KB each is significantly slower than processing one
     * **Compaction:** Use `.coalesce(n)` before writing data to merge small partitions into larger files (target **128MB to 256MB**).
     * **File Max Partition Bytes:** Adjust `spark.sql.files.maxPartitionBytes` (default 128MB) to control how Spark groups small files into a single partition during a read.
     * **Format Choice:** Use **Parquet** or **ORC**. These columnar formats support schema evolution and "Predicate Pushdown," allowing Spark to skip reading unnecessary columns or rows.
+    * 
+
+
+
+# Salting: A Deep Dive into Manual Skew Resolution
+
+**Salting** is a sophisticated manual optimization technique used to resolve **data skew**. Skew occurs when a few "hot keys" contain significantly more records than others, forcing a single executor to become a bottleneck (the "straggler" task) while others sit idle. 
+
+By appending a random value—the **salt**—to these keys, you artificially break a single massive data group into multiple smaller, manageable groups that Spark can process in parallel.
+
+---
+
+## How Salting Works
+The process typically involves three primary steps, most commonly used when joining a **heavily skewed dataset** with a **balanced lookup table**:
+
+1.  **Salt the Skewed Dataset:** Add a new column containing a random integer (the salt) within a defined range of "buckets" (e.g., $0$ to $9$).
+2.  **Expand the Lookup Dataset:** To ensure the join logic remains valid, you must duplicate every row in the smaller, balanced dataset for every possible salt value used in step one.
+3.  **Join on the Salted Key:** Perform the join using a composite key: the **Original Key + Salt**. This ensures data is distributed evenly across executors based on the unique combinations.
+
+---
+
+## Example Scenario: Joining Transaction Data
+Imagine joining two datasets on `customer_id`:
+* **Dataset A (Skewed):** Millions of transactions where `customer_id = 123` accounts for 80% of the total volume.
+* **Dataset B (Balanced):** A lookup table containing unique metadata for each customer.
+
+### The Problem: Join Without Salting
+In a standard Shuffle Hash Join, Spark hashes the key (`123`) to determine the partition. Consequently, **all millions of records** for `customer_id = 123` are sent to a single partition on one executor.
+* **Result:** A single "straggler" task that takes significantly longer than others, often leading to **OutOfMemory (OOM)** errors or massive **shuffle spills** to disk.
+
+### The Solution: Join With Salting (Using 5 Buckets)
+1.  **Modify Dataset A:** Add a salt column using a random function: 
+    `df1.withColumn("salt", floor(rand() * 5))`. 
+    The keys for customer 123 are now distributed as `123_0`, `123_1`, `123_2`, `123_3`, and `123_4`.
+2.  **Modify Dataset B:** Use an `explode` operation to duplicate every row five times, assigning each copy a salt value from $0$ to $4$.
+3.  **Perform Join:** Join the tables on `["customer_id", "salt"]`.
+
+---
+
+## Executor-Level Behavior Comparison
+
+| Metric | Without Salting | With Salting (5 Buckets) |
+| :--- | :--- | :--- |
+| **Executor 1 Load** | 100% of `customer_id = 123` | ~20% of `customer_id = 123` |
+| **Executors 2–5** | Idle / Waiting | ~20% of `customer_id = 123` each |
+| **Risk of OOM** | High | Low |
+| **Total Duration** | Limited by the slowest task | Parallelized and significantly faster |
+
+> [!TIP]
+> **Post-Processing:** Once the join is complete, the `salt` column is no longer needed and should be dropped using `.drop("salt")` to keep the schema clean.
+
+---
+
+Would you like me to provide a **PySpark code snippet** demonstrating exactly how to implement the `explode` and `rand()` functions for this salting logic?```    
