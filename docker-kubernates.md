@@ -82,3 +82,46 @@ graph TD
     style A fill:#bbf,stroke:#333
     style C fill:#dfd,stroke:#333
 ```
+# Building the Cloud-Native Stack: Dockerfiles & Kubernetes Manifests
+
+Creating the infrastructure for modern applications requires mastering two distinct declarative formats: **Dockerfiles** for packaging and **Kubernetes Manifests** for orchestration.
+
+---
+
+## 🐳 Mastering the Dockerfile
+A **Dockerfile** is a step-by-step script that assembles a static container image. It defines the environment, dependencies, and execution parameters of your application.
+
+### Key Instructional Concepts
+* **Base Image (`FROM`):** The starting point of every image. It provides the initial OS and runtime (e.g., `node:20-alpine` or `python:3.11`).
+* **Working Directory (`WORKDIR`):** Sets the active directory inside the container for all subsequent commands, similar to `cd`.
+* **File Transfer (`COPY`):** Migrates source code and configuration files from your local machine into the container's filesystem.
+* **Build Execution (`RUN`):** Commands executed during the image creation phase, such as `npm install` or `apt-get update`.
+* **Runtime Command (`CMD`):** Specifies the default command that triggers when a container instance starts up.
+
+### Advanced Best Practices
+* **Security Context (`USER`):** A vital security step that switches the container from the default `root` user to a non-privileged user to limit the "blast radius" of a potential breach.
+* **Multi-Stage Builds:** A technique using multiple `FROM` statements to separate the **build environment** (compilers, build tools) from the **production runtime**. This results in significantly smaller and more secure images.
+
+---
+
+## ☸️ Mastering Kubernetes Manifests
+Kubernetes uses **YAML manifests** to define the "Desired State" of a cluster. These files tell the Kubernetes Control Plane exactly how resources should behave and interact.
+
+### The Anatomy of a Manifest
+A standard K8s object is defined by four primary root keys:
+1.  **`apiVersion`:** Specifies the version of the Kubernetes API (e.g., `v1` or `apps/v1`).
+2.  **`kind`:** Defines the resource type (e.g., `Pod`, `Deployment`, or `Service`).
+3.  **`metadata`:** Contains the resource name, UID, and **Labels** used for grouping and discovery.
+4.  **`spec`:** The core configuration block where the desired behavior is defined.
+
+### Essential `spec` Fields
+| Field | Purpose |
+| :--- | :--- |
+| **Replicas** | The specific number of identical Pod instances that should be running at all times. |
+| **Selector** | A label-matching mechanism that tells a Controller (like a Deployment) which Pods it is responsible for. |
+| **Template** | The "blueprint" for the Pod, including the container image, ports, and environment variables. |
+| **Resource Management** | Defines **Requests** (minimum guaranteed CPU/RAM) and **Limits** (maximum allowed usage) to prevent resource exhaustion. |
+
+### Operational & Security Controls
+* **Security Policies (`securityContext`):** Hardens the container by enforcing `runAsNonRoot`, using a `readOnlyRootFilesystem`, or dropping unnecessary Linux capabilities.
+* **Persistent Storage:** Uses **Volumes** and **VolumeMounts** to connect containers to persistent data sources (like `PersistentVolumeClaims`), ensuring data survives if a container restarts.
