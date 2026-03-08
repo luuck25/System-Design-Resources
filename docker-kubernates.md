@@ -12,6 +12,12 @@ Docker and Kubernetes are the foundational technologies of the modern software e
 ## 🐳 Docker: The Building Blocks of Containerization
 Docker revolutionized engineering by providing a lightweight alternative to Virtual Machines (VMs). By sharing the host OS kernel instead of virtualizing hardware, Docker ensures applications are isolated yet highly efficient.
 
+<img width="782" height="512" alt="image" src="https://github.com/user-attachments/assets/efc242ce-999a-48b5-a4f5-f44fbe731840" />
+
+<img width="756" height="236" alt="image" src="https://github.com/user-attachments/assets/9fbe8c4a-1ece-4c62-948e-5539f670b4f8" />
+
+
+
 ### How it Works
 Docker utilizes two primary Linux kernel features to create isolation:
 * **Namespaces:** Provide containers with their own partitioned view of the system (Process IDs, Network, etc.).
