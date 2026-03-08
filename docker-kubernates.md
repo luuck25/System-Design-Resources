@@ -210,4 +210,41 @@ EXPOSE 3000
 
 # 8. Start the application
 CMD ["node", "index.js"]
+```
+
+### 1. Dockerfile Logic
+**Explanation**
+* **Base Image (`FROM`):** Acts as the foundation. Using `alpine` keeps the image size under 100MB, which reduces the attack surface and speeds up pull/push times.
+* **Layer Caching:** By copying `package.json` before the source code, Docker only re-installs dependencies if your package manifests change, making subsequent builds significantly faster.
+* **Non-Root User (`USER`):** Running as `root` is a security risk. If an attacker exploits the application, the `USER node` directive prevents them from having full control over the container host.
+
+---
+
+### 2. Docker Compose: The Local Coordinator
+**Concept**
+* **Docker Compose** manages multi-container applications (e.g., App + Database) on a single host. It is primarily used in development to ensure all team members run the exact same environment with a single command.
+
+  version: '3.8'
+services:
+  # The Application Service
+  web-app:
+    build: .
+    ports:
+      - "8080:3000"
+    environment:
+      - DB_URL=db-host
+    depends_on:
+      - db-host
+
+  # The Database Service
+  db-host:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_PASSWORD=mypassword
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+  
 
