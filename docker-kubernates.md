@@ -16,6 +16,7 @@ Docker revolutionized engineering by providing a lightweight alternative to Virt
 
 <img width="756" height="236" alt="image" src="https://github.com/user-attachments/assets/9fbe8c4a-1ece-4c62-948e-5539f670b4f8" />
 
+<img width="718" height="445" alt="image" src="https://github.com/user-attachments/assets/69b05e7d-d66c-46fc-beba-1f3ed079d600" />
 
 
 ### How it Works
