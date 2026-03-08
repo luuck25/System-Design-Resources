@@ -52,3 +52,31 @@ The relationship is best understood through analogies: Docker containers are the
 > **Technical Insight:** As of version 1.24, Kubernetes deprecated `dockershim` (a direct bridge to Docker Engine). However, this **does not** mean K8s stopped supporting Docker. Because Docker produces **OCI-compliant images**, they remain fully compatible with the lightweight runtimes Kubernetes now uses, such as `containerd` or `CRI-O`.
 
 In a typical workflow, developers use **Docker** to build and package images, then hand those images over to **Kubernetes** to handle the heavy lifting of production operations.
+
+graph TD
+    subgraph "Development Phase (Local Machine)"
+        A[App Code] -->|Builds| B(Docker / Podman Image)
+        B -->|Pushed to| C[Image Registry / Docker Hub]
+    end
+
+    subgraph "Production Phase (Kubernetes Cluster)"
+        C -->|Pulls Image| D[Control Plane / Master Node]
+        D -->|Schedules| E[Worker Node 1]
+        D -->|Schedules| F[Worker Node 2]
+        
+        subgraph "Node 1"
+            E --> P1[Pod A]
+            P1 --> C1[Container]
+        end
+        
+        subgraph "Node 2"
+            F --> P2[Pod B]
+            F --> P3[Pod C]
+            P2 --> C2[Container]
+            P3 --> C3[Container]
+        end
+    end
+
+    style D fill:#f96,stroke:#333,stroke-width:2px
+    style A fill:#bbf,stroke:#333
+    style C fill:#dfd,stroke:#333
