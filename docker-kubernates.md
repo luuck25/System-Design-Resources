@@ -223,8 +223,8 @@ CMD ["node", "index.js"]
 ### 2. Docker Compose: The Local Coordinator
 **Concept**
 * **Docker Compose** manages multi-container applications (e.g., App + Database) on a single host. It is primarily used in development to ensure all team members run the exact same environment with a single command.
-
-  version: '3.8'
+```dockerfile
+version: '3.8'
 services:
   # The Application Service
   web-app:
@@ -246,5 +246,5 @@ services:
 
 volumes:
   db-data:
-  
+```  
 
