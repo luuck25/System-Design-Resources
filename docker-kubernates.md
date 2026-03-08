@@ -53,6 +53,7 @@ The relationship is best understood through analogies: Docker containers are the
 
 In a typical workflow, developers use **Docker** to build and package images, then hand those images over to **Kubernetes** to handle the heavy lifting of production operations.
 
+```mermaid
 graph TD
     subgraph "Development Phase (Local Machine)"
         A[App Code] -->|Builds| B(Docker / Podman Image)
@@ -80,3 +81,4 @@ graph TD
     style D fill:#f96,stroke:#333,stroke-width:2px
     style A fill:#bbf,stroke:#333
     style C fill:#dfd,stroke:#333
+```
