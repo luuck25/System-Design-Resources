@@ -1,5 +1,10 @@
 # Docker vs. Kubernetes: The Pillars of Cloud-Native Infrastructure
 
+<img width="949" height="557" alt="image" src="https://github.com/user-attachments/assets/c91b6b49-380d-4b10-870c-015c1627eaad" />
+
+<img width="658" height="424" alt="image" src="https://github.com/user-attachments/assets/718f4168-ba6c-4abe-8cb6-5dde0d5637dd" />
+
+
 Docker and Kubernetes are the foundational technologies of the modern software ecosystem. While they are often mentioned together, they serve distinct, complementary roles: **Docker** packages the application, while **Kubernetes** manages the application at scale.
 
 ---
@@ -248,3 +253,89 @@ volumes:
   db-data:
 ```  
 
+### 2. Docker Compose Logic (Continued)
+**Explanation**
+* **Service Networking:** Containers can talk to each other using service names as hostnames. The app connects to `db-host` automatically within the internal Docker network, eliminating the need for hardcoded IP addresses.
+* **Port Mapping:** The configuration `8080:3000` maps your laptop's port `8080` to the container's internal port `3000`. This allows you to access the application via your web browser at `localhost:8080`.
+* **Persistence (`volumes`):** Standard containers are ephemeral, meaning data is lost when the container is deleted. Volumes map a persistent folder on your host machine to the container so that database data survives restarts and removals.
+
+---
+
+### 3. Kubernetes: Production Orchestration
+**Concept**
+* **Kubernetes (K8s)** is a platform that manages containerized workloads across a cluster of many physical or virtual servers. It is designed for production environments to provide high availability, automated scaling, and self-healing capabilities.
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: node-container
+        image: my-repo/node-app:v1.0
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+        ports:
+        - containerPort: 3000
+```
+
+### 3. Kubernetes Logic (Continued)
+**Explanation**
+* **Replicas:** Tells Kubernetes to ensure exactly 3 copies of the pod are running at all times. If a server node crashes, K8s automatically detects the loss and reschedules those pods onto healthy nodes to maintain availability.
+* **Resource Management:** `requests` guarantee a minimum amount of CPU/RAM for the container to function, while `limits` act as a "hard ceiling" to prevent a single container from hogging all server resources and affecting other applications.
+* **Declarative State:** You don't tell Kubernetes "run this command." Instead, you define the **desired state** in a YAML file, and the Kubernetes "Control Plane" constantly works in a loop to match the actual state of the cluster to your defined file.
+
+---
+
+### 4. Helm: The Package Manager
+**Concept**
+* **Helm** uses templates to make Kubernetes manifests dynamic. This allows you to define your application logic once and reuse the same code across multiple environments (Dev, Staging, and Production) simply by changing a few variables.
+
+Code: values.yaml (The Config)
+
+```
+# Environment-specific settings
+replicaCount: 5
+imageTag: "prod-stable"
+cpuLimit: "1000m"
+```
+Code: templates/deployment.yaml (The Blueprint)
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    spec:
+      containers:
+      - name: app
+        image: "my-repo/node-app:{{ .Values.imageTag }}"
+        resources:
+          limits:
+            cpu: {{ .Values.cpuLimit }}
+```
+
+Explanation
+Templating: Instead of hardcoding "5 replicas," we use {{ .Values.replicaCount }}. This allows one chart to serve every environment.
+
+Versioning: Helm tracks "Releases." If a new deployment fails, you can run helm rollback to instantly revert to the previous working state.
+
+Reusability: Helm allows you to share your application "package" with others, who can then install it with their own custom values.yaml file.
