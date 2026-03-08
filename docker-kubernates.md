@@ -173,3 +173,41 @@ Helm is the **"Package Manager for Kubernetes"** (analogous to `npm` for Node.js
 | **Best For** | Development Speed | Production Reliability |
 
 Would you like me to show you a practical example of a **Helm Template** compared to a standard **Kubernetes Manifest**?
+
+
+
+# Comprehensive Guide: The Container & Orchestration Ecosystem
+
+This document provides the full technical context, file structures, and detailed explanations for the modern DevOps stack, strictly formatted as a single Markdown block.
+
+---
+
+## 1. Docker: The Building Block
+**Concept:** A `Dockerfile` is a script that packages your code, runtime, and dependencies into a single, immutable image.
+
+### Code: `Dockerfile`
+```dockerfile
+# 1. Use a slim Node.js base to reduce image size
+FROM node:20-alpine
+
+# 2. Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# 3. Copy package manifests first for efficient layer caching
+COPY package*.json ./
+
+# 4. Install production dependencies
+RUN npm install --production
+
+# 5. Copy the remaining application source code
+COPY . .
+
+# 6. Security: Switch from 'root' to the built-in 'node' user
+USER node
+
+# 7. Expose the application port
+EXPOSE 3000
+
+# 8. Start the application
+CMD ["node", "index.js"]
+
