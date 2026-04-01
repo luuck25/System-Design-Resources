@@ -27,8 +27,6 @@ By default, if Flink sees an event with a timestamp of 12:05, it might assume al
 
 To prevent this, you configure a **delay** (e.g., 2 minutes). 
 
-Now, when Flink sees an event timestamped 12:05, it emits a watermark for **12:03** (12:05 - 2 minutes). It is effectively saying: *"I have seen data up to 12:05, but because data can be messy, I'm only going to officially close windows up to 12:03."*
-
 ### A Real-World Analogy
 Imagine you are hosting a meeting that starts at 9:00 AM.
 
