@@ -26,7 +26,7 @@ stream.keyBy(Event::getKey)
     .window(TumblingEventTimeWindows.of(Time.minutes(10)))
     .allowedLateness(Time.minutes(5)) // Keep state alive for 5 extra minutes
     .process(new MyWindowFunction());
-
+```
 ## 3. Side Outputs (The "Dead Letter Queue")
 
 If an event arrives after the watermark AND after the allowed lateness period, the window state is already deleted to free up memory. By default, Flink drops this data. Side Outputs allow you to capture these ultra-late events.
