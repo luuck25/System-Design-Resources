@@ -195,6 +195,8 @@ Streaming systems often fail because they get overwhelmed by sudden spikes in tr
 ### Summary
 Flink is reliable because it acts like a tightly coordinated, highly defensive database. Through **HA (to stay online), Checkpointing (to save state), 2PC (to write safely), and Event Time (to calculate accurately)**, Flink ensures that streaming applications can run 24/7/365 with mathematical guarantees on data correctness.
 
+<img width="995" height="545" alt="image" src="https://github.com/user-attachments/assets/f19c92b5-3a59-4b9c-ab6a-2775391a3670" />
+
 
 # How Apache Flink Achieves Massive Scalability
 
