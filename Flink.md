@@ -100,3 +100,50 @@ Handling late data is a strict balance between accuracy and memory consumption (
 *   **Seconds to Minutes:** Use Watermark delays to handle standard network jitter.
 *   **Minutes to Hours:** Use Allowed Lateness for operational delays.
 *   **Days+:** Use Side Outputs for extreme delays. Do not use Allowed Lateness for days, or your cluster will run out of memory. Reconcile this ultra-late data via a separate batch job.
+
+# How Apache Flink Ensures Fault Tolerance
+
+Apache Flink is designed to run continuously for months or years. To survive hardware failures, network partitions, or software crashes without losing data or double-counting events, Flink relies on a robust fault-tolerance mechanism built around **Distributed Checkpointing**.
+
+Here is a breakdown of how Flink ensures fault tolerance under the hood.
+
+---
+
+## 1. The Foundation: Distributed Checkpoints (The "Game Save")
+
+Flink’s fault tolerance is based on taking consistent "snapshots" of the entire application's state at regular intervals (e.g., every 10 seconds or 1 minute). 
+
+*   **The Video Game Analogy:** Think of a Checkpoint like an autosave in a video game. If your character dies (a server crashes), you don't start the game from the very beginning. You reload the last autosave, and everything—your inventory, your health, your location—is restored to exactly how it was at that exact moment.
+*   **What is saved?** Flink saves the state of every operator (e.g., the current sum of a window, machine learning model weights) AND the exact position of the input source (e.g., Kafka offsets or file read positions).
+
+## 2. The Mechanism: Checkpoint Barriers (Chandy-Lamport Algorithm)
+
+Because Flink is a distributed system processing millions of events per second across many servers, it cannot just "pause" the whole system to take a snapshot. Instead, it uses a variation of the **Chandy-Lamport algorithm** using **Checkpoint Barriers**.
+
+1.  **Injection:** The JobManager (the master node) periodically injects a special control record called a **Checkpoint Barrier** into the data streams at the sources.
+2.  **Flowing with Data:** This barrier flows downstream *with* the data. It separates the data stream into two parts: "Data belonging to the *current* checkpoint" and "Data belonging to the *next* checkpoint."
+3.  **Operator Snapshot:** When a worker node (TaskManager) receives the barrier, it temporarily stops processing, saves its current state to a durable storage system, and then forwards the barrier to the next operator.
+4.  **Completion:** Once the barrier reaches the end of the data pipeline (the Sinks), the JobManager marks that Checkpoint as 100% successful.
+
+## 3. The Storage: State Backends
+
+Where do these snapshots actually go? If a server catches fire, saving the state on that server's local hard drive is useless.
+
+*   **Local Processing:** While running, Flink keeps state locally in memory (Heap) or on the local disk using an embedded database called **RocksDB**. This makes reading and writing extremely fast.
+*   **Durable Checkpointing:** When a checkpoint is triggered, Flink asynchronously copies that local RocksDB state to a highly available, remote, persistent file system like **Amazon S3, HDFS, or Azure Blob Storage**.
+
+## 4. The Recovery Process (When a Crash Happens)
+
+If a TaskManager (worker node) crashes, the current in-flight processing fails. Flink immediately initiates the recovery process:
+
+1.  **Restart:** The JobManager spins up new TaskManager containers to replace the dead ones.
+2.  **Download State:** Flink downloads the last successful Checkpoint from remote storage (S3/HDFS).
+3.  **Restore State:** Every operator's state (windows, counters, aggregations) is restored to the exact state it was in at the time of the checkpoint.
+4.  **Rewind the Source:** Flink tells the data source (like Kafka or Kinesis) to rewind its read position to the exact offset recorded in the checkpoint.
+5.  **Resume Processing:** Flink resumes consuming data. It simply re-processes the data that arrived between the last checkpoint and the crash.
+
+## 5. The Prerequisite: Replayable Sources
+
+For Flink's fault tolerance to guarantee **Exactly-Once Processing Semantics**, it absolutely requires a **replayable data source**.
+
+If Flink crashes and restores from a checkpoint taken 2 minutes ago, it needs the data source to be able to "replay" the last 2 minutes of data. This is why Flink is almost always paired with systems like **Apache Kafka, AWS Kinesis, or Apache Pulsar**, which retain data for days and allow consumers to easily rewind their read positions. If you read from a non-replayable source (like a standard HTTP endpoint/webhook), Flink cannot guarantee exactly-once processing during a crash.  
