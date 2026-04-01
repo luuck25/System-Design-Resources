@@ -36,20 +36,20 @@
 **Question:** How do you guarantee no data loss and no duplicate writes?
 *(Note: Be prepared to discuss Two-Phase Commit (2PC) and transactional sinks here!)*
 
-“Flink ensures exactly-once processing internally using checkpointing, where both Kafka offsets and operator state are stored together.
+> “Flink ensures exactly-once processing internally using checkpointing, where both Kafka offsets and operator state are stored together.
 
-In case of failure, Flink restores from the last checkpoint and resumes consuming from the correct Kafka offset, avoiding data loss.
+> In case of failure, Flink restores from the last checkpoint and resumes consuming from the correct Kafka offset, avoiding data loss.
 
-However, to guarantee no duplicates in the sink (like a database), we need transactional or idempotent sinks.
+> However, to guarantee no duplicates in the sink (like a database), we need transactional or idempotent sinks.
 
-Flink provides this using a two-phase commit protocol, where:
+> Flink provides this using a two-phase commit protocol, where:
 
-Data is first written in a pre-commit phase
-Only committed when the checkpoint succeeds
+> Data is first written in a pre-commit phase
+> Only committed when the checkpoint succeeds
 
-If failure happens before commit, the transaction is aborted, ensuring no partial or duplicate writes.
+> If failure happens before commit, the transaction is aborted, ensuring no partial or duplicate writes.
 
-This gives end-to-end exactly-once guarantees.”
+> This gives end-to-end exactly-once guarantees.”
 ---
 
 ### Question 4: Late Data Edge Case
