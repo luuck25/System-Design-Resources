@@ -36,7 +36,7 @@ The **actual code** for a specific database (like BigQuery, Azure SQL, or Postgr
 
 <img width="1117" height="552" alt="image" src="https://github.com/user-attachments/assets/e488540f-44c2-49fb-a6d0-1cafc5535470" />
 
-<img width="1548" height="1096" alt="image" src="https://github.com/user-attachments/assets/b35c4442-5382-4ecd-b7b4-f8238c1b4c59" />
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/b35c4442-5382-4ecd-b7b4-f8238c1b4c59" />
 
 
 * **Relationships:** How the entities interact (e.g., A Customer **places** an Order).
@@ -64,7 +64,7 @@ The goal is to isolate data so that additions, deletions, and modifications can 
 ## The Normal Forms (Level of Detail)
 Database normalization follows a series of steps called **Normal Forms (NF)**. Most production databases aim for **3rd Normal Form**.
 
-<img width="637" height="651" alt="image" src="https://github.com/user-attachments/assets/195effbc-591a-450e-922a-30a7770f94f0" />
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/195effbc-591a-450e-922a-30a7770f94f0" />
 ---
 
 ### 1. First Normal Form (1NF)
