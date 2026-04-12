@@ -90,3 +90,57 @@ In real-time streams, a Sale might arrive at 10:00 AM, but the "New Customer" re
 3.  **Use Surrogate Keys** (Preferably Hashes for distributed systems).
 4.  **Assign SCD Types** to every column (usually Type 1 for fixes, Type 2 for history).
 5.  **Use Conformed Dimensions** to create a "Single Version of the Truth."
+
+# Understanding Uniqueness in SCD Type 2
+
+In a **Slowly Changing Dimension (SCD) Type 2** environment, managing uniqueness is the most critical part of the design. Because SCD2 tracks history by adding new rows rather than overwriting existing ones, traditional "Business Keys" lose their uniqueness.
+
+---
+
+## 1. The Primary Unique Identifier: The Surrogate Key (SK)
+
+The **Surrogate Key** is a system-generated, meaningless identifier assigned to every single row in the dimension table. It serves as the **Primary Key (PK)**.
+
+* **Why it's necessary:** Since a single customer (e.g., ID 101) might have multiple rows—one for each address change—the database needs a way to distinguish "Version 1" from "Version 2."
+* **Fact Table Integration:** The Fact table always stores the **Surrogate Key**, not the Business Key. This "point-in-time" link ensures that a sale is tied to the specific attributes (like the city the customer lived in) that existed at the exact moment of the transaction.
+* **Immutability:** Unlike business keys, surrogate keys never change, protecting your warehouse from logic shifts in the source systems.
+
+---
+
+## 2. The "Natural" or Business Key (BK)
+
+The **Business Key** is the identifier used in the source system (e.g., `EMP_005` or `PROD_99`).
+
+* **The Role:** In SCD2, the Business Key acts as a descriptive attribute or a grouping mechanism.
+* **The Nuance:** It is **not unique** in an SCD2 dimension table. It will repeat every time a historical change is recorded for that entity.
+* **Usage:** It is primarily used during the ETL/ELT process to "look up" existing records and determine if a new version needs to be created.
+
+---
+
+## 3. The Composite Key Alternative
+
+While a single Surrogate Key is the industry standard, uniqueness can technically be defined using a **Composite Key**. This is rarely used as a physical Primary Key in modern warehouses due to join performance, but it is useful for logical validation:
+
+* **Business Key + Effective Date:** Ensures a customer cannot have two changes starting at the exact same time.
+* **Business Key + Version Number:** Ensures each version for a specific ID is incremented correctly.
+
+---
+
+## 4. Visual Representation of SCD2 Uniqueness
+
+Notice how the `Customer_ID` repeats as the user moves cities, but the `Dim_SK` remains globally unique:
+
+| Dim_SK (PK) | Customer_ID (BK) | City | Effective_Date | End_Date | Is_Current |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1001** | CUST_99 | New York | 2023-01-01 | 2023-05-14 | N |
+| **1052** | CUST_99 | Chicago | 2023-05-15 | 9999-12-31 | Y |
+| **1089** | CUST_42 | Miami | 2024-02-10 | 9999-12-31 | Y |
+
+---
+
+## Summary Checklist for SCD2 Uniqueness
+
+* **Primary Unique Key:** Always use a **Surrogate Key** (`Dim_SK`).
+* **Business Key:** Keep the `Customer_ID` for grouping, but expect it to repeat across rows.
+* **Version Control:** Use `Start_Date`, `End_Date`, and `Is_Current` flags. While these help filter for the "right" version, they are metadata and should not replace the Surrogate Key for joining to Fact tables.
+* **Key Generation:** In modern distributed systems (like BigQuery or Spark), consider using **Hash Keys** (SHA-256) as your Surrogate Keys to allow for parallel generation.
