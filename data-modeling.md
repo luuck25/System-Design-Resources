@@ -86,4 +86,8 @@ Database normalization follows a series of steps called **Normal Forms (NF)**. M
 
 <img width="800" height="538" alt="image" src="https://github.com/user-attachments/assets/5565337c-c5c6-458e-ba2f-22a31e7b2123" />
 
-  
+
+#  Denormalization
+---
+<img width="1135" height="626" alt="image" src="https://github.com/user-attachments/assets/9cda9a06-4f4d-4cbd-a685-d0901c55f2e2" />
+
