@@ -731,6 +731,46 @@ This data model follows the **Kimball Dimensional Modeling** methodology to solv
 5. **Window functions** for cumulative adoption metrics over 3 years
 6. **Star schema** for query simplicity and BI tool compatibility
 
+## One Query Direct for Short Interview
+```
+SELECT 
+    p.cohort_group,
+    p.product_name,
+    YEAR(d.full_date) - YEAR(p.launch_date) + 1 AS year_number,
+    SUM(s.sales_amount) AS yearly_revenue,
+    SUM(s.quantity) AS yearly_units,
+    -- Cumulative revenue
+    SUM(SUM(s.sales_amount)) OVER (
+        PARTITION BY p.product_name 
+        ORDER BY YEAR(d.full_date) - YEAR(p.launch_date) + 1
+    ) AS cumulative_revenue,
+    -- Previous year revenue
+    LAG(SUM(s.sales_amount)) OVER (
+        PARTITION BY p.product_name 
+        ORDER BY YEAR(d.full_date) - YEAR(p.launch_date) + 1
+    ) AS prev_year_revenue,
+    -- YoY % change
+    ROUND(
+        (SUM(s.sales_amount) - LAG(SUM(s.sales_amount)) OVER (
+            PARTITION BY p.product_name 
+            ORDER BY YEAR(d.full_date) - YEAR(p.launch_date) + 1
+        )) * 100.0 
+        / NULLIF(LAG(SUM(s.sales_amount)) OVER (
+            PARTITION BY p.product_name 
+            ORDER BY YEAR(d.full_date) - YEAR(p.launch_date) + 1
+        ), 0), 2
+    ) AS yoy_pct_change
+FROM fct_sales s
+JOIN dim_product p ON s.product_sk = p.product_sk
+JOIN dim_date d ON s.date_sk = d.date_sk
+WHERE d.full_date >= p.launch_date
+  AND d.full_date < DATEADD('year', 3, p.launch_date)
+GROUP BY p.cohort_group, p.product_name, 
+         YEAR(d.full_date) - YEAR(p.launch_date) + 1
+ORDER BY p.cohort_group, p.product_name, 
+         YEAR(d.full_date) - YEAR(p.launch_date) + 1;
+```
+
 The model enables the merchandising team to:
 - **Compare products within the same launch cohort** using cohort_rank and percentile
 - **Classify adoption patterns:** Strong Early Adoption, Slow Burn, Never Took Off
