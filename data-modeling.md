@@ -9,7 +9,7 @@ Think of it like an **architect's floor plan**: before you build a house (the da
 ## The Three Levels of Data Modeling
 As a project moves from a business idea to a technical reality, it usually goes through three stages:
 
-<img width="1000" height="1060" alt="image" src="https://github.com/user-attachments/assets/441703ce-1cf7-44e8-bf26-a8bde7a212a8" />
+<img width="700" height="700" alt="image" src="https://github.com/user-attachments/assets/441703ce-1cf7-44e8-bf26-a8bde7a212a8" />
 
 ### 1. Conceptual Model (The "What")
 Focuses on **high-level business concepts**.
