@@ -41,3 +41,34 @@ The **actual code** for a specific database (like BigQuery, Azure SQL, or Postgr
 
 * **Relationships:** How the entities interact (e.g., A Customer **places** an Order).
 * **Constraints:** The rules of the data (e.g., "A Sale Amount cannot be negative").
+
+
+# Database Normalization
+
+**Normalization** is the process of organizing data in a database to reduce **redundancy** (repetition) and improve **data integrity** (accuracy). 
+
+The goal is to isolate data so that additions, deletions, and modifications can be made in just one table and then propagated through the rest of the database using defined relationships.
+
+---
+
+## Why Normalize?
+* **Eliminate Duplicate Data:** Saves storage space and prevents **update anomalies** (e.g., updating an address in one place but forgetting another).
+* **Data Integrity:** Ensures that related data is stored logically.
+* **Query Efficiency:** Smaller tables are often faster to index and scan.
+
+---
+
+## The Normal Forms (Level of Detail)
+Database normalization follows a series of steps called **Normal Forms (NF)**. Most production databases aim for **3rd Normal Form**.
+
+### 1. First Normal Form (1NF)
+* **Rule:** **Atomic values** only. No repeating groups or arrays in a single cell.
+* **Example:** Instead of a `Colors` column containing `"Red, Blue"`, you create two separate rows or a related table.
+
+### 2. Second Normal Form (2NF)
+* **Rule:** Meet all 1NF requirements + All non-key columns must depend on the **entire Primary Key**.
+* **Example:** In a table with a composite key (`Order_ID` + `Product_ID`), `Product_Name` shouldn't be included because it only depends on the `Product_ID`, not the `Order_ID`.
+
+### 3. Third Normal Form (3NF)
+* **Rule:** Meet all 2NF requirements + No **transitive dependencies** (non-key columns depending on other non-key columns).
+* **Example:** If a table has `Zip_Code` and `City`, the `City` depends on the `Zip_Code`, not the Primary Key. To reach 3NF, you move `Zip_Code` and `City` to their own lookup table.
