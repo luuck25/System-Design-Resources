@@ -71,10 +71,19 @@ Database normalization follows a series of steps called **Normal Forms (NF)**. M
 * **Rule:** **Atomic values** only. No repeating groups or arrays in a single cell.
 * **Example:** Instead of a `Colors` column containing `"Red, Blue"`, you create two separate rows or a related table.
 
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/a033b0e5-44b9-4f42-b807-bc90d2479de0" />
+
 ### 2. Second Normal Form (2NF)
 * **Rule:** Meet all 1NF requirements + All non-key columns must depend on the **entire Primary Key**.
 * **Example:** In a table with a composite key (`Order_ID` + `Product_ID`), `Product_Name` shouldn't be included because it only depends on the `Product_ID`, not the `Order_ID`.
 
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/6eac7e32-7ba3-4a7f-a851-7b0ee3b604c9" />
+  
+
 ### 3. Third Normal Form (3NF)
 * **Rule:** Meet all 2NF requirements + No **transitive dependencies** (non-key columns depending on other non-key columns).
 * **Example:** If a table has `Zip_Code` and `City`, the `City` depends on the `Zip_Code`, not the Primary Key. To reach 3NF, you move `Zip_Code` and `City` to their own lookup table.
+
+<img width="800" height="538" alt="image" src="https://github.com/user-attachments/assets/5565337c-c5c6-458e-ba2f-22a31e7b2123" />
+
+  
