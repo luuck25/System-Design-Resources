@@ -177,6 +177,7 @@ To ensure the **Fact Table** has the correct SK, Spark performs a **Point-in-Tim
 To find the right SK, the join condition must match the **Business Key** and ensure the **Sale Date** falls between the dimension's **Effective Date** and **End Date**.
 
 # The join logic for both initial and future loads
+```
 fact_table_final = raw_sales.join(
     dim_customer,
     (raw_sales.Customer_ID == dim_customer.Customer_ID) &
@@ -187,19 +188,20 @@ fact_table_final = raw_sales.join(
     raw_sales["*"], 
     dim_customer["Customer_SK"] # This attaches the specific historical version
 )
+```
 
-3. Handling Future Data (The Pipeline Workflow)
+## 3. Handling Future Data (The Pipeline Workflow)
+
 For every future batch of sales data, the workflow follows these three steps to ensure consistency:
 
-Update the Dimension (SCD2): Run your Spark job to process any customer changes. New rows get new Customer_SK values based on their new Effective_Date.
+1.  **Update the Dimension (SCD2):** Run your Spark job to process any customer changes. New rows get new `Customer_SK` values based on their new `Effective_Date`.
+2.  **SK Lookup Join:** The Spark job reads the new Sales data and joins it against the **entire** updated Dimension table.
+3.  **Append to BigQuery:** The resulting dataframe—now containing the correct `Customer_SK`—is appended to the BigQuery Fact table.
 
-SK Lookup Join: The Spark job reads the new Sales data and joins it against the entire updated Dimension table.
+---
 
-Append to BigQuery: The resulting dataframe—now containing the correct Customer_SK—is appended to the BigQuery Fact table.
+### 💡 Summary of Standards
 
-💡 Summary of Standards
-Initial Load: Generate SKs for all history using hashing; join Sales to Dim using the date-range logic.
-
-Incremental Loads: Always perform the join in Spark before writing to BigQuery. This ensures that even "late-arriving" sales are linked to the historically accurate customer record.
-
-Performance: For large joins, use Broadcast Joins in Spark if the Dimension table is small enough to fit in memory, making the "lookup every time" extremely fast.
+* **Initial Load:** Generate SKs for all history using hashing; join Sales to Dim using the date-range logic.
+* **Incremental Loads:** Always perform the join in Spark before writing to BigQuery. This ensures that even "late-arriving" sales are linked to the historically accurate customer record.
+* **Performance:** For large joins, use **Broadcast Joins** in Spark if the Dimension table is small enough to fit in memory, making the "lookup every time" extremely fast.
