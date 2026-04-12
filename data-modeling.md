@@ -64,8 +64,8 @@ The goal is to isolate data so that additions, deletions, and modifications can 
 ## The Normal Forms (Level of Detail)
 Database normalization follows a series of steps called **Normal Forms (NF)**. Most production databases aim for **3rd Normal Form**.
 
-<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/195effbc-591a-450e-922a-30a7770f94f0" />
----
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/9bcbb8e5-66e4-4752-8e99-899db02f5bd8" />
+
 
 ### 1. First Normal Form (1NF)
 * **Rule:** **Atomic values** only. No repeating groups or arrays in a single cell.
