@@ -144,3 +144,62 @@ Notice how the `Customer_ID` repeats as the user moves cities, but the `Dim_SK` 
 * **Business Key:** Keep the `Customer_ID` for grouping, but expect it to repeat across rows.
 * **Version Control:** Use `Start_Date`, `End_Date`, and `Is_Current` flags. While these help filter for the "right" version, they are metadata and should not replace the Surrogate Key for joining to Fact tables.
 * **Key Generation:** In modern distributed systems (like BigQuery or Spark), consider using **Hash Keys** (SHA-256) as your Surrogate Keys to allow for parallel generation.
+
+
+# Implementing Surrogate Keys in BigQuery with Spark
+
+When migrating from a relational source like **Azure SQL** to a distributed warehouse like **BigQuery**, the process of maintaining **Surrogate Keys (SK)** changes. You move away from "Auto-Increment" and toward **Hash-based Keys** and **Set-based Joins**.
+
+---
+
+## 1. Creating the Surrogate Key in the Dim Table
+In Spark, we generate the SK by hashing the **Business Key** (Natural Key) and the **Effective Date**. This ensures each historical version has a unique, repeatable ID without needing a central counter.
+
+### The Code (PySpark):
+```python
+from pyspark.sql.functions import sha2, concat_ws, col
+
+# Generate a unique SK for each version of a customer
+dim_with_sk = source_df.withColumn(
+    "Customer_SK", 
+    sha2(concat_ws("||", col("Customer_ID"), col("Effective_Date")), 256)
+)
+```
+
+## 2. Inserting Sales Records with the Correct SK
+
+To ensure the **Fact Table** has the correct SK, Spark performs a **Point-in-Time Lookup**. It joins the incoming Sales data against the Dimension table to find which version of the customer was "Active" when the sale happened.
+
+### Does Spark look up every time?
+**Yes**, but it doesn't do it row-by-row (which is slow). Instead, it loads the Dimension table into memory and performs a **distributed join**.
+
+### The Logic:
+To find the right SK, the join condition must match the **Business Key** and ensure the **Sale Date** falls between the dimension's **Effective Date** and **End Date**.
+
+# The join logic for both initial and future loads
+fact_table_final = raw_sales.join(
+    dim_customer,
+    (raw_sales.Customer_ID == dim_customer.Customer_ID) &
+    (raw_sales.Sale_Date >= dim_customer.Effective_Date) &
+    (raw_sales.Sale_Date <= dim_customer.End_Date),
+    "left"
+).select(
+    raw_sales["*"], 
+    dim_customer["Customer_SK"] # This attaches the specific historical version
+)
+
+3. Handling Future Data (The Pipeline Workflow)
+For every future batch of sales data, the workflow follows these three steps to ensure consistency:
+
+Update the Dimension (SCD2): Run your Spark job to process any customer changes. New rows get new Customer_SK values based on their new Effective_Date.
+
+SK Lookup Join: The Spark job reads the new Sales data and joins it against the entire updated Dimension table.
+
+Append to BigQuery: The resulting dataframe—now containing the correct Customer_SK—is appended to the BigQuery Fact table.
+
+💡 Summary of Standards
+Initial Load: Generate SKs for all history using hashing; join Sales to Dim using the date-range logic.
+
+Incremental Loads: Always perform the join in Spark before writing to BigQuery. This ensures that even "late-arriving" sales are linked to the historically accurate customer record.
+
+Performance: For large joins, use Broadcast Joins in Spark if the Dimension table is small enough to fit in memory, making the "lookup every time" extremely fast.
