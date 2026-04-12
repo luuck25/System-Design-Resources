@@ -91,3 +91,67 @@ Database normalization follows a series of steps called **Normal Forms (NF)**. M
 ---
 <img width="1135" height="626" alt="image" src="https://github.com/user-attachments/assets/9cda9a06-4f4d-4cbd-a685-d0901c55f2e2" />
 
+
+# Different Kinds of Data Modeling
+
+Data modeling is not a "one size fits all" process. Different business needs require different architectural styles. Here are the most common kinds of data modeling used in modern engineering:
+
+---
+
+## 1. Relational Modeling (ER Modeling)
+This is the "traditional" style used for **transactional systems** (OLTP) like Azure SQL or Postgres. It is heavily focused on **Normalization** to ensure data integrity and minimize storage.
+* **Structure:** Uses Entity-Relationship (ER) diagrams to show how tables connect via primary and foreign keys.
+* **Best For:** Applications where users are creating, updating, or deleting single records (e.g., an e-commerce checkout system).
+* **Pros:** Very high data consistency; no duplicate data.
+* **Cons:** Queries involving many "joins" can become slow.
+
+---
+
+## 2. Dimensional Modeling
+This is the standard for **Data Warehousing** (OLAP) like BigQuery or Snowflake. It prioritizes **read performance** and ease of use for analysts.
+* **Structure:** Uses the **Star Schema** or **Snowflake Schema**.
+    * **Fact Tables:** Contain quantitative metrics (e.g., `Sale_Amount`).
+    * **Dimension Tables:** Contain descriptive context (e.g., `Customer_Name`, `Product_Category`).
+* **Best For:** Analytical reporting and business intelligence (BI).
+* **Nuance:** This is where **SCD Type 2** lives.
+
+---
+
+## 3. Data Vault Modeling
+A modern alternative to Dimensional modeling, designed for **large-scale enterprise data warehouses**.
+* **Structure:** Separates data into three components:
+    * **Hubs:** Unique business keys (e.g., `Customer_ID`).
+    * **Links:** The associations between Hubs.
+    * **Satellites:** The descriptive attributes (where the history is stored).
+* **Best For:** Environments with many different source systems that change frequently.
+* **Pros:** Highly agile and auditable; easy to add new sources without breaking existing models.
+
+---
+
+## 4. Graph Modeling
+Instead of rows and columns, this model treats data as **Nodes** (objects) and **Edges** (relationships).
+* **Structure:** Focuses on the "connections" between data points.
+* **Best For:** Social networks, fraud detection, and recommendation engines.
+* **Example:** "Person A **is friends with** Person B" or "Device X **logged into** Account Y."
+
+---
+
+## 5. Document Modeling (NoSQL)
+Used in non-relational databases like **MongoDB** or **DynamoDB**.
+* **Structure:** Data is stored in JSON-like "documents." It is **schema-less**, meaning every row can have different columns.
+* **Best For:** Real-time web apps, content management, and handling unstructured data (like sensor logs).
+* **Pros:** Extremely fast for single-record lookups and very flexible.
+
+---
+
+## Summary Comparison
+
+| Model Type | Primary Goal | Common Technology |
+| :--- | :--- | :--- |
+| **Relational (ER)** | Integrity / Accuracy | Azure SQL, Postgres |
+| **Dimensional** | Analytics / Speed | BigQuery, Snowflake |
+| **Data Vault** | Scalability / Auditing | Large Enterprise Hubs |
+| **Graph** | Relationship Analysis | Neo4j, AWS Neptune |
+| **Document** | Flexibility / Speed | MongoDB, DynamoDB |
+
+Since we have spent a lot of time on **Dimensional Modeling** (SCD2/Facts), would you like to see a comparison of how a **Star Schema** is different from a **Data Vault** for a real-world scenario like "Tracking Sales"?
