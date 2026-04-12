@@ -732,6 +732,7 @@ This data model follows the **Kimball Dimensional Modeling** methodology to solv
 6. **Star schema** for query simplicity and BI tool compatibility
 
 ## One Query Direct for Short Interview
+
 ```sql
 SELECT 
     p.cohort_group,
