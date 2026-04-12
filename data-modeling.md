@@ -36,7 +36,7 @@ The **actual code** for a specific database (like BigQuery, Azure SQL, or Postgr
 
 <img width="1117" height="552" alt="image" src="https://github.com/user-attachments/assets/e488540f-44c2-49fb-a6d0-1cafc5535470" />
 
-<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/b35c4442-5382-4ecd-b7b4-f8238c1b4c59" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/b35c4442-5382-4ecd-b7b4-f8238c1b4c59" />
 
 
 * **Relationships:** How the entities interact (e.g., A Customer **places** an Order).
