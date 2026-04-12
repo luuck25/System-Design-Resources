@@ -1,4 +1,4 @@
-# Staff Data Engineer Interview: Product Launch Performance Data Modeling
+Product Launch Performance Data Modeling
 
 ## Interview Problem Statement
 
