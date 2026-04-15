@@ -85,23 +85,26 @@ This describes how we physically store and process the bits and bytes of organiz
 
 
 
-# The Traditional Centralized Architecture: The "Two-Silo" Era
+# Data Lake - The Traditional Centralized Architecture: The "Two-Silo" Era
 
-In the traditional centralized architecture, organizations were historically forced to maintain two separate silos: a **Data Lake** for raw storage and a **Data Warehouse** for high-performance analytics. This dual-system requirement was driven by the technical limitations of early data lakes, which could not provide the speed or reliability of a dedicated warehouse.
+In the traditional centralized architecture, organizations were historically forced to maintain two separate silos: a **Data Lake** for raw storage and a **Data Warehouse** for high-performance analytics. 
+
+This dual-system requirement was driven by the technical limitations of early data lakes, which could not provide the speed or reliability of a dedicated warehouse.
 
 ---
 
-## The "Two-Silo" Centralized Architecture
-Before the emergence of the lakehouse, these two systems existed in tandem to solve different business problems, creating a fragmented data landscape.
 
 ### 1. Implementation & Data Flow
 Organizations relied on a complex, multi-stage pipeline to manage their information:
 * **Initial Ingestion (ELT):** Companies used an **Extract-Load-Transform (ELT)** process to dump raw, unstructured data into a **Data Lake** (utilizing cheap object storage like Amazon S3 or Google Cloud Storage). 
+
 * **Secondary Movement (ETL):** Because the lake was technically too slow and unoptimized for business reporting, a second **Extract-Transform-Load (ETL)** pipeline was required. This pipeline would move cleaned, structured, and aggregated data into a physically separate **Data Warehouse** (built on expensive, high-performance block storage).
 
 ### 2. Data Quality (DQ) and Governance
 Under this model, governance was split and often wildly inconsistent:
+
 * **The Warehouse:** Offered high data quality, robust security, and strict **"schema-on-write"** rules. It was the "gold standard" for reliability but was limited in scope.
+  
 * **The Data Lake:** Frequently devolved into a **"data swamp"**—a messy, unmanaged repository. In this environment, quality was low, metadata was missing, and finding specific data points was difficult for anyone but the original engineer.
 
 ### 3. The Main Problem: Operational Friction
