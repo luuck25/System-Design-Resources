@@ -21,7 +21,9 @@
 4. [Part IV — Data Governance](#part-iv--data-governance)
    - [What is Data Governance?](#10-data-governance)
    - [Governance Across Architectures](#governance-across-architectures)
-5. [Appendix — Why External Tables Weren't Enough](#appendix-why-external-tables-werent-enough)
+5. [Appendix A — Why External Tables Weren't Enough](#appendix-why-external-tables-werent-enough)
+6. [Appendix B — Inmon vs Kimball (Warehouse Design)](#appendix-b-inmon-vs-kimball--warehouse-design-approaches)
+7. [Appendix C — Data Catalog & Data Lineage](#appendix-c-data-catalog--data-lineage)
 
 ---
 
