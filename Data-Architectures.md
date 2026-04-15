@@ -56,3 +56,29 @@ Even though teams are independent, they must still follow global rules. This is 
 * **To:** An ecosystem of interconnected **Data Products**.
 
 > **Best For:** Large enterprises with complex domains and high-velocity data requirements.
+
+
+# DW/ DataLake/ LakeHouse - how data is stored & queried
+
+# The Technical Evolution (The "Plumbing")
+This describes how we physically store and process the bits and bytes of organizational data.
+
+---
+
+### 1. The Era of the Data Warehouse (1980s – 2010s)
+* **The Vibe:** "Cleanliness is Next to Godliness."
+* **The Tech:** Relational databases like Oracle, Teradata, and later Snowflake/BigQuery.
+* **The Philosophy:** **Schema-on-Write.** You had to perfectly model and structure your data *before* loading it into the system.
+* **The Limitation:** It was expensive and strictly limited to **structured data** (rows/columns). It couldn't handle "messy" data like images, logs, or long-form text. It acted as a "Black Box"—accessing the data was difficult and costly.
+
+### 2. The Era of the Data Lake (2010s – 2020)
+* **The Vibe:** "Save Everything, Figure it Out Later."
+* **The Tech:** Hadoop (HDFS) and Cloud Storage (Amazon S3, Azure Blob).
+* **The Philosophy:** **Schema-on-Read.** You simply dump raw files (JSON, CSV, MP4, PDF) into cheap storage and only apply structure when you are ready to use the data.
+* **The Limitation:** It frequently turned into a **"Data Swamp."** Without strict rules, the data became impossible to find or trust. While great for Data Scientists, it was terrible for Business Analysts who needed clean reports. It also lacked **ACID transactions** (the ability to update specific rows without rewriting entire files).
+
+### 3. The Era of the Data Lakehouse (2020 – 2026)
+* **The Vibe:** "The Best of Both Worlds."
+* **The Tech:** Databricks (Delta Lake), Apache Iceberg, Apache Hudi.
+* **The Philosophy:** You store data in a **Lake** (cheap, raw, and flexible) but add a **Metadata Layer** on top that provides the features of a **Warehouse** (SQL support, row-level deletes, and quality enforcement).
+* **Why it's the winner:** It allows organizations to run BI reports and AI/ML models on the **same exact files**. This eliminates the need to move or duplicate data across different systems.
