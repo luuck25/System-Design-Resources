@@ -250,6 +250,82 @@ Data is highly refined and optimized for **business reporting and analytics**.
 * **Purpose:** To serve as a single source of truth for strategic decision-making.
 * **Action:** This layer typically utilizes read-optimized dimensional models, such as **Kimball star schemas**, to provide high-speed performance for BI tools.
 
+# Quering Delta Data as Tables in Spark
+
+Yes—and this is exactly how a **Lakehouse** is meant to be used. You don’t query files directly; you expose them as tables via a **Catalog Layer** so Spark (and other engines) can use SQL naturally.
+
+To achieve a "Delta files underneath, but query like a table" experience, you need:
+**Delta Files + Metadata Layer + Catalog + Query Engine (Spark)**
+
+---
+
+## 1. Option 1: Spark SQL Table (Basic Registration)
+### How it works
+You register a Delta path as a table in your local Spark session:
+
+```sql
+CREATE TABLE orders
+USING DELTA
+LOCATION '/mnt/data/orders';
+```
+
+### Internals
+* **Spark:** Reads the `_delta_log` and registers the table in the session metastore.
+* **Table Points to:** A specific path, not internal proprietary storage.
+* **Limitation:** The table is often only visible inside that specific Spark session or metastore; it is not easily shareable across different engines.
+
+---
+
+### 2. Option 2: Hive Metastore (The Traditional Way)
+#### Architecture
+**Spark** $\rightarrow$ **Hive Metastore** (Table Definitions) $\rightarrow$ **Delta Files** (GCS/S3/ADLS)
+
+#### Benefits
+* Multiple Spark jobs can share the same table definitions.
+* Provides a centralized schema.
+
+#### Limitation
+* Hive was not originally designed for versioned tables or advanced metadata (like Iceberg or Delta), leading to only **partial** lakehouse support.
+
+---
+
+### 3. Option 3: Unity Catalog (Modern – Databricks)
+#### What it adds
+Unity Catalog provides a central management layer across:
+* Spark Clusters
+* SQL Warehouses
+* Fine-grained access control (Security)
+
+#### Architecture
+**Spark / Databricks SQL** $\rightarrow$ **Unity Catalog** $\rightarrow$ **Delta Tables** $\rightarrow$ **Parquet Files**
+
+#### Key Advantage
+👉 Provides a **true "database-like experience"** over a raw lake.
+
+---
+
+### 4. Option 4: Delta + External Query Engines (Cross-Engine Power)
+You can expose Delta tables to engines outside of Spark, such as **Trino** or **Presto**, using dedicated connectors.
+
+#### Architecture
+**Trino / Spark** $\rightarrow$ **Delta Connector** $\rightarrow$ **_delta_log** $\rightarrow$ **Parquet Files**
+
+#### Result
+You can run standard SQL without Spark even being active:
+
+```sql
+SELECT * FROM delta.orders;
+```
+
+### Summary: The Role of the Catalog
+
+| Feature | Local Spark Table | Hive Metastore | Unity Catalog / Iceberg |
+| :--- | :--- | :--- | :--- |
+| **Visibility** | Session only | Organization-wide | Multi-workspace / Multi-engine |
+| **Security** | None (File-level) | Basic | Fine-grained (Column/Row) |
+| **Best For** | Ad-hoc Analysis | Legacy Pipelines | Modern Enterprise Lakehouse |
+
+
 
 # Data Governance Explained
 
