@@ -226,3 +226,26 @@ These formats add database-like capabilities to standard files:
 * **Updates and Deletes:** Traditional lakes only supported "appends." Lakehouses allow standard SQL updates:
   ```sql
   UPDATE sales_table SET price = 100 WHERE product_id = 10;
+
+  # The Medallion Data Architecture (MDA)
+
+While traditional centralized systems like Data Warehouses and Data Lakes have concepts of raw and refined data, the **Medallion Data Architecture (MDA)** is specifically defined as the standard implementation for a **Data Lakehouse**. 
+
+It is a multi-layered, quality-focused design approach used to ensure that lakehouse data is progressively cleansed and validated as it moves from ingestion to consumption. The architecture organizes data into three distinct stages to bridge the gap between the raw flexibility of a lake and the structured reliability of a warehouse:
+
+---
+
+### 1. Bronze Layer (Raw)
+This layer acts as the **landing zone**, preserving the immutable raw state of data exactly as it was received from source systems. 
+* **Purpose:** To provide a permanent record of the original data.
+* **Action:** Minimal transformation; data is stored "as-is" to allow for reprocessing if logic changes later.
+
+### 2. Silver Layer (Conformed)
+In this stage, data is cleansed, deduplicated, and unified to provide an **"enterprise view"** of key business entities and transactions. 
+* **Purpose:** To create a reliable, consistent version of the truth for data science and engineering.
+* **Action:** Applying schemas, handling null values, and merging disparate data sources.
+
+### 3. Gold Layer (Presentation)
+Data is highly refined and optimized for **business reporting and analytics**. 
+* **Purpose:** To serve as a single source of truth for strategic decision-making.
+* **Action:** This layer typically utilizes read-optimized dimensional models, such as **Kimball star schemas**, to provide high-speed performance for BI tools.
