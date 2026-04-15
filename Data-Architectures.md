@@ -19,7 +19,9 @@ In a centralized architecture, all data flows from various sources into a single
 
 > **Best For:** Startups, small-to-medium businesses, or organizations with highly standardized data needs.
 
-# Data Mesh Architecture
+<img width="571" height="307" alt="image" src="https://github.com/user-attachments/assets/1470e0f4-b56e-44c9-9999-a9a62a325a99" />
+
+# Data Mesh Architecture - De-centralized
 
 ## Overview
 Data Mesh is a decentralized, sociotechnical approach that treats **Data as a Product**. Instead of one central team, ownership is distributed to the business domains (Sales, Marketing, HR) that actually create the data.
