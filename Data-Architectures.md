@@ -136,7 +136,9 @@ This describes how we physically store and process the bits and bytes of organiz
 * **The Philosophy:** You store data in a **Lake** (cheap, raw, and flexible) but add a **Metadata Layer** on top that provides the features of a **Warehouse** (SQL support, row-level deletes, and quality enforcement).
 * **Why it's the winner:** It allows organizations to run BI reports and AI/ML models on the **same exact files**. This eliminates the need to move or duplicate data across different systems.
 
-<img width="514" height="127" alt="Lakehouse Era" src="https://github.com/user-attachments/assets/e93d35b6-e936-4a79-96a8-9f9810d4199c" />
+---
+
+<img width="514" height="300" alt="Lakehouse Era" src="https://github.com/user-attachments/assets/e93d35b6-e936-4a79-96a8-9f9810d4199c" />
 
 <img width="1005" height="487" alt="Architecture Comparison" src="https://github.com/user-attachments/assets/28515374-9b41-482a-aad0-eb863e1a977f" />
 
