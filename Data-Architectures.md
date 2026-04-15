@@ -85,14 +85,16 @@ This describes how we physically store and process the bits and bytes of organiz
 
 
 
-# Data Lake - The Traditional Centralized Architecture: The "Two-Silo" Era
 
-In the traditional centralized architecture, organizations were historically forced to maintain two separate silos: a **Data Lake** for raw storage and a **Data Warehouse** for high-performance analytics. 
 
-This dual-system requirement was driven by the technical limitations of early data lakes, which could not provide the speed or reliability of a dedicated warehouse.
 
----
 
+
+
+
+# Data Lakes and Data Warehouses
+
+With DataLakes we have to have separate DataWarehouse. Organizations were historically forced to maintain two separate silos: a **Data Lake** for raw storage and a **Data Warehouse** for high-performance analytics. 
 
 ### 1. Implementation & Data Flow
 Organizations relied on a complex, multi-stage pipeline to manage their information:
@@ -112,3 +114,63 @@ This architecture created several critical pain points for the modern enterprise
 * **Massive Data Duplication:** Organizations were forced to pay for the storage and management of the same data in two different places.
 * **High Operational Costs:** Maintaining two different tech stacks, two sets of security protocols, and two different engineering teams led to bloated budgets.
 * **Stale Data:** Because of the time-consuming process required to move and sync information between the "two boxes," the data available to business leaders in the warehouse was often hours, days, or even weeks behind the actual raw events captured in the lake.
+
+
+
+## Data Lakes
+Data Lakes are designed to store **large volumes of raw data at low cost**.
+
+They are typically built on object storage systems such as:
+* Amazon S3
+* Azure Data Lake Storage
+* Google Cloud Storage
+* Hadoop HDFS
+
+### Advantages
+Data lakes provide several benefits:
+* Highly scalable storage
+* Low storage cost
+* Ability to store structured and unstructured data
+* Flexible for data science workloads
+
+### Challenges
+However, traditional data lakes also introduced significant problems:
+* Lack of strong governance
+* Poor data quality management
+* No schema enforcement
+* Difficult for BI tools to query efficiently
+
+Over time many data lakes turned into what engineers call **“Data Swamps.”**
+
+---
+
+## Data Warehouses
+Data Warehouses were built to support **fast analytical queries and reporting**.
+
+Popular platforms include:
+* Ocient
+* BigQuery
+* Amazon Redshift
+* Snowflake
+
+### Advantages
+Data warehouses provide:
+* High-performance SQL queries
+* Strong schema enforcement
+* Mature governance and security
+* Excellent integration with BI tools
+
+### Challenges
+Despite these strengths, warehouses have limitations:
+* Expensive storage costs
+* Limited support for unstructured data
+* Heavy ETL pipelines required
+* Data duplication between lake and warehouse
+
+In many organizations data had to be **copied from the lake into the warehouse** before analytics could be performed.
+
+**This increased:**
+* Infrastructure cost
+* Pipeline complexity
+* Data latency
+
