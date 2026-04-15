@@ -66,6 +66,9 @@ This describes how we physically store and process the bits and bytes of organiz
 ---
 
 ### 1. The Era of the Data Warehouse (1980s – 2010s)
+
+<img width="517" height="126" alt="image" src="https://github.com/user-attachments/assets/e32edca3-06df-4960-8825-11678c73dee3" />
+
 * **The Vibe:** "Cleanliness is Next to Godliness."
 * **The Tech:** Relational databases like Oracle, Teradata, and later Snowflake/BigQuery.
 * **The Philosophy:** **Schema-on-Write.** You had to perfectly model and structure your data *before* loading it into the system.
@@ -90,6 +93,10 @@ This describes how we physically store and process the bits and bytes of organiz
 
 
 
+
+<img width="514" height="127" alt="image" src="https://github.com/user-attachments/assets/e93d35b6-e936-4a79-96a8-9f9810d4199c" />
+
+<img width="1005" height="487" alt="image" src="https://github.com/user-attachments/assets/28515374-9b41-482a-aad0-eb863e1a977f" />
 
 
 # Data Lakes and Data Warehouses
@@ -167,6 +174,8 @@ Despite these strengths, warehouses have limitations:
 * Heavy ETL pipelines required
 * Data duplication between lake and warehouse
 
+
+
 In many organizations data had to be **copied from the lake into the warehouse** before analytics could be performed.
 
 **This increased:**
@@ -174,3 +183,40 @@ In many organizations data had to be **copied from the lake into the warehouse**
 * Pipeline complexity
 * Data latency
 
+# The Data Lakehouse Architecture
+
+The **Data Lakehouse** architecture was introduced to eliminate the traditional separation between the Data Lake and the Data Warehouse. Instead of maintaining two disjointed systems, a Lakehouse enables **warehouse-style analytics directly on top of data lake storage.**
+
+> **In simple terms:** A Lakehouse keeps all data in the data lake but adds technology layers that make it behave like a high-performance data warehouse.
+
+This creates a **single, unified platform** that supports:
+* Data Engineering & Batch Processing
+* Business Intelligence (BI) & Analytics
+* Machine Learning (ML)
+* AI Workloads
+
+---
+
+## 1. How a Lakehouse Stores Data
+A common misunderstanding is that a Lakehouse stores "Lake data" and "Warehouse data" in separate locations. In reality, **all data lives in the same object storage layer.** The defining difference is the introduction of a **Table Management Layer** that converts flat files into structured, queryable tables.
+
+### Physical Storage Comparison
+| Storage Type | Structure Example | Characteristics |
+| :--- | :--- | :--- |
+| **Traditional Data Lake** | `/raw/clickstream/file1.json` | Simple files; no transaction control; no schema. |
+| **Lakehouse Storage** | `/sales_table/part-001.parquet` | Parquet files + **Metadata** + **Transaction Logs**. |
+
+In a Lakehouse, when you run `SELECT * FROM sales_table;`, the user sees a table, but the system is actually reading optimized Parquet files while using metadata to ensure structure and consistency.
+
+---
+
+## 2. The Core Technology: Table Formats
+The "magic" that enables the Lakehouse is the **Modern Table Format Layer**. Popular formats include **Delta Lake**, **Apache Iceberg**, and **Apache Hudi**.
+
+These formats add database-like capabilities to standard files:
+* **ACID Transactions:** Multiple pipelines can safely read and write data concurrently without corruption.
+* **Schema Enforcement:** Prevents "Data Swamps" by ensuring data matches the defined table structure.
+* **Time Travel:** Allows users to query historical versions of data (e.g., `SELECT * FROM sales_table VERSION AS OF 5;`).
+* **Updates and Deletes:** Traditional lakes only supported "appends." Lakehouses allow standard SQL updates:
+  ```sql
+  UPDATE sales_table SET price = 100 WHERE product_id = 10;
