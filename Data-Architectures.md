@@ -185,6 +185,12 @@ In many organizations data had to be **copied from the lake into the warehouse**
 
 # The Data Lakehouse Architecture
 
+<img width="505" height="140" alt="image" src="https://github.com/user-attachments/assets/54c9d426-4ff4-4565-a7bd-18196520368c" />
+
+LakeHouse - Its combination of data lake and data warehouse, so lake comes from data lake and warehouse comes from data warehouse, Hence LakeHouse.
+
+Here we don't maintain Separate Warehouse. Stored data in file act as a warehouse with the help of Metadata or table management Layer.
+
 The **Data Lakehouse** architecture was introduced to eliminate the traditional separation between the Data Lake and the Data Warehouse. Instead of maintaining two disjointed systems, a Lakehouse enables **warehouse-style analytics directly on top of data lake storage.**
 
 > **In simple terms:** A Lakehouse keeps all data in the data lake but adds technology layers that make it behave like a high-performance data warehouse.
