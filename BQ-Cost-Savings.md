@@ -252,7 +252,19 @@ A **dedicated in-memory cache** for BI workloads. Pre-loads frequently accessed 
 
 ## 7. Query Optimization Techniques
 
-### 7.1 Avoid Cross Joins & Cartesian Products
+### 7.1 Largest Table on LEFT (Broadcast Joins)
+
+Always place the **largest table on the left** of a JOIN. BigQuery sends (broadcasts) the smaller right-hand table to all workers, minimizing expensive data shuffling across the network:
+
+```sql
+-- ✅ Large table LEFT, small table RIGHT
+SELECT f.*, d.product_name
+FROM fact_sales f              -- 1B rows (stays distributed)
+JOIN dim_product d             -- 10K rows (broadcast to all workers)
+  ON f.product_id = d.product_id;
+```
+
+### 7.2 Avoid Cross Joins & Cartesian Products
 
 ```sql
 -- BAD: explodes row count
@@ -262,7 +274,7 @@ SELECT * FROM table_a, table_b;
 SELECT * FROM table_a JOIN table_b ON table_a.id = table_b.id;
 ```
 
-### 7.2 Use Approximate Functions
+### 7.3 Use Approximate Functions
 
 ```sql
 -- Exact (expensive on huge tables)
@@ -274,11 +286,11 @@ SELECT APPROX_COUNT_DISTINCT(user_id) FROM events;
 
 Also: `APPROX_QUANTILES`, `APPROX_TOP_COUNT`, `APPROX_TOP_SUM`.
 
-### 7.3 Filter Early with WHERE
+### 7.4 Filter Early with WHERE
 
 Push filters as early as possible — especially on partition/cluster columns.
 
-### 7.4 Avoid Repeated Subqueries — Use CTEs or Temp Tables
+### 7.5 Avoid Repeated Subqueries — Use CTEs or Temp Tables
 
 ```sql
 -- Instead of scanning the same table multiple times in subqueries
@@ -288,11 +300,11 @@ WITH base AS (
 SELECT ... FROM base JOIN ...;
 ```
 
-### 7.5 Use INT64 Keys Instead of STRING Joins
+### 7.6 Use INT64 Keys Instead of STRING Joins
 
 Integer comparisons are **faster and cheaper** than string comparisons.
 
-### 7.6 Use Nested/Repeated Fields to Eliminate Joins
+### 7.7 Use Nested/Repeated Fields to Eliminate Joins
 
 For many-to-one relationships, denormalize using **STRUCTs and ARRAYs**:
 
@@ -401,7 +413,52 @@ BigQuery stores data in **compressed columnar format** internally. You're billed
 ALTER TABLE sales SET OPTIONS (storage_billing_model = 'PHYSICAL');
 ```
 
-Physical bytes billing charges for the **compressed size** (~70–80% smaller), which can be significantly cheaper for highly compressible data. Trade-off: time travel bytes also count.
+Physical bytes billing charges for the **compressed size** (~70–80% smaller), which can be significantly cheaper for highly compressible data.
+
+### Logical vs Physical — Detailed Breakdown
+
+| Aspect | Logical Billing (Default) | Physical Billing |
+| :--- | :--- | :--- |
+| **What's measured** | Raw, uncompressed bytes | Compressed bytes on disk |
+| **Per-GiB rate** | Lower rate | Higher rate |
+| **Typical data size** | 1x (uncompressed) | 0.1x–0.3x (10x+ compression for JSON/logs) |
+| **Time travel included?** | Yes (included in price) | No — charged separately |
+| **Fail-safe included?** | Yes (included in price) | No — charged separately |
+| **Best for** | Low-compression data (already compact) | Highly compressible data (JSON, logs, text) |
+
+> **Rule of thumb:** If your compression ratio is better than **2:1**, physical billing saves money. For JSON logs it's often **10:1** — massive savings.
+
+### Reduce Time Travel Window
+
+The default time-travel window is **7 days** — you pay for all those historical bytes under physical billing. For non-critical datasets, reduce it:
+
+```sql
+-- Reduce time travel from 7 days to 2 days
+ALTER TABLE staging_events
+SET OPTIONS (max_time_travel_hours = 48);
+```
+
+This shrinks the storage footprint of deleted/changed data significantly.
+
+### Snapshots & Clones (Cost-Efficient Data Protection)
+
+Instead of copying entire tables for backups or testing (which doubles storage cost), use:
+
+- **Table Snapshots:** Point-in-time read-only copy. Only stores the **delta** (changes), not a full copy — nearly free for unchanged data.
+- **Table Clones:** Writable copy that shares storage with the base table until modified. Perfect for dev/test environments.
+
+```sql
+-- Snapshot: near-zero storage cost
+CREATE SNAPSHOT TABLE backups.orders_snap
+CLONE project.dataset.orders
+FOR SYSTEM_TIME AS OF TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR);
+
+-- Clone: writable, shares storage with base
+CREATE TABLE dev.orders_clone
+CLONE project.dataset.orders;
+```
+
+> **Cost impact:** A clone of a 1 TB table costs nearly **$0** until you start modifying rows. A full `CREATE TABLE AS SELECT` would cost $20/month immediately.
 
 ---
 
@@ -445,6 +502,55 @@ ORDER BY size_bytes DESC;
 
 ---
 
+## 13. Native vs Non-Native (External) Tables — Cost Comparison
+
+This is a critical cost consideration. **Where your data lives** dramatically affects what you pay.
+
+### Storage Costs
+
+| Aspect | Native Tables | Non-Native (External) Tables |
+| :--- | :--- | :--- |
+| **Storage fee** | Paid to BigQuery (Logical or Physical billing) | Paid to source (GCS, AWS S3, Azure Blob, etc.) |
+| **Long-term discount** | 50% drop after 90 days untouched | Not available |
+| **Time travel** | Included (7 days default) | Not available |
+| **Fail-safe** | Included (7 days) | Not available |
+
+### Compute & Query Costs
+
+| Aspect | Native Tables | Non-Native (External) Tables |
+| :--- | :--- | :--- |
+| **On-demand rate** | $6.25 / TiB | $6.25 / TiB (same cloud) |
+| **BigQuery Omni (cross-cloud)** | N/A | **$9.125 / TiB** (46% premium) |
+| **Network egress** | None (co-located) | Cross-region transfer fees apply |
+| **Performance** | High (optimized columnar format) | Lower (network overhead + source format inefficiency) |
+| **Slot consumption** | Lower | Higher (more work to read external formats) |
+
+### Optimization Feature Support
+
+| Feature | Native Tables | Non-Native (External) Tables |
+| :--- | :--- | :--- |
+| **Query caching (24hr free)** | Supported | Mostly **not supported** (except Cloud Storage) |
+| **Partitioning** | Full support | Limited (hive-style only) |
+| **Clustering** | Full support | **Not supported** |
+| **BI Engine** | Supported | **Not supported** |
+| **Search Indexes** | Supported | **Not supported** |
+| **Materialized Views** | Supported | Limited |
+| **DML (UPDATE/DELETE)** | Full CRUD | **Read-only** |
+| **Snapshots & Clones** | Supported (near-zero cost) | **Not supported** |
+
+### The Hidden Cost Trap
+
+External tables seem cheaper because you avoid BigQuery storage fees. But in practice:
+
+- **No caching** → you pay full scan cost every time you repeat a query
+- **No clustering** → full-table scans on every query
+- **No BI Engine** → dashboards are slower and more expensive
+- **Higher slot usage** → queries take longer, consuming more compute
+
+> **Interview insight:** External tables are best for **infrequent, exploratory queries** on data you don't want to ingest. For anything queried regularly, the batch load is free and native tables save far more on compute than they cost on storage.
+
+---
+
 ## Quick Reference: Cost Levers by Impact
 
 | Lever | Impact | Effort |
@@ -456,9 +562,13 @@ ORDER BY size_bytes DESC;
 | **Materialized Views** | High | Low |
 | **Search Indexes** | Very High (text search) | Low |
 | **BI Engine** | High (for BI) | Low |
+| **Native tables over external** | High | Medium |
 | **Physical bytes billing** | Medium–High | Low |
+| **Reduce time travel window** | Medium | Low |
+| **Snapshots/Clones (not copies)** | Medium | Low |
 | **Table/partition expiration** | Medium | Low |
 | **Approximate functions** | Medium | Low |
+| **Broadcast JOINs (large LEFT)** | Medium | Zero |
 | **Storage Write API (over streaming)** | Medium | Low |
 | **Batch loading** | Medium | Low |
 | **Dry runs / Query Validator** | Preventive | Zero |
