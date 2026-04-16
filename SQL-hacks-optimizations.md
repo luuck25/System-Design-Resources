@@ -534,6 +534,99 @@ WHERE NOT EXISTS (
 );
 ```
 
+### Why NOT IN Breaks — Step by Step
+
+SQL uses **three-valued logic**: `TRUE`, `FALSE`, and `UNKNOWN`. Any comparison with `NULL` returns `UNKNOWN`:
+
+```
+101 = 101   → TRUE
+101 = 102   → FALSE
+101 = NULL  → UNKNOWN  (you can't know if NULL equals 101)
+```
+
+Say `blacklist` has these `customer_id` values: **`[101, 105, NULL]`**
+
+For an order with `customer_id = 200` (clearly NOT in the blacklist):
+
+```sql
+WHERE 200 NOT IN (101, 105, NULL)
+```
+
+SQL expands `NOT IN` internally as:
+
+```sql
+WHERE 200 != 101 AND 200 != 105 AND 200 != NULL
+```
+
+Evaluate each:
+
+```
+200 != 101   → TRUE
+200 != 105   → TRUE
+200 != NULL  → UNKNOWN   ← the problem
+```
+
+Combine with AND:
+
+```
+TRUE AND TRUE AND UNKNOWN → UNKNOWN
+```
+
+SQL treats `UNKNOWN` as "not TRUE" → **row is excluded**. So `customer_id = 200` is NOT returned, even though 200 is clearly not in the blacklist.
+
+### Every Row Gets Poisoned
+
+```
+customer_id = 101 (actual blacklisted):
+  101 != 101 → FALSE → FALSE AND ... → FALSE
+  Not returned ✅ (correct)
+
+customer_id = 200 (not blacklisted):
+  200 != 101 → TRUE, 200 != 105 → TRUE, 200 != NULL → UNKNOWN
+  TRUE AND TRUE AND UNKNOWN → UNKNOWN
+  Not returned ❌ (WRONG — 200 should be included!)
+
+customer_id = 300 (not blacklisted):
+  300 != 101 → TRUE, 300 != 105 → TRUE, 300 != NULL → UNKNOWN
+  TRUE AND TRUE AND UNKNOWN → UNKNOWN
+  Not returned ❌ (WRONG again!)
+```
+
+**Every non-blacklisted row is excluded.** You get zero rows back — no error, no warning. Completely silent bug.
+
+### Why NOT EXISTS Doesn't Have This Problem
+
+```sql
+SELECT * FROM orders o
+WHERE NOT EXISTS (
+    SELECT 1 FROM blacklist b WHERE b.customer_id = o.customer_id
+);
+```
+
+For `customer_id = 200`:
+
+```
+Does any row in blacklist have customer_id = 200?
+  Row 1: 101 = 200? → FALSE
+  Row 2: 105 = 200? → FALSE
+  Row 3: NULL = 200? → UNKNOWN (not TRUE)
+
+No TRUE found → EXISTS returns FALSE
+NOT FALSE → TRUE → Row IS returned ✅
+```
+
+`EXISTS` only cares if **any row returned TRUE**. `UNKNOWN` results are skipped — they don't poison the `AND` chain like `NOT IN` does.
+
+### Summary
+
+| | `NOT IN` with NULLs | `NOT EXISTS` with NULLs |
+| :--- | :--- | :--- |
+| **Internal logic** | `!= NULL` → UNKNOWN, AND chain breaks | EXISTS ignores UNKNOWN rows |
+| **Result** | **Zero rows** (silent bug) | **Correct rows** |
+| **Error/Warning?** | None. Completely silent. | N/A |
+
+> **Rule: Never use `NOT IN` with a subquery. Always use `NOT EXISTS`.**
+>
 > **Interview killer:** Most candidates don't know about the NULL trap with `NOT IN`. Mentioning this unprompted shows deep SQL knowledge.
 
 ---
